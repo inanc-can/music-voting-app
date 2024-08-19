@@ -12,6 +12,8 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+    "typeRoots": ["node_modules/@types"],
+    "types": ["phoenix", "spotify-api", "spotify-web-playback-sdk"],
     "plugins": [
       {
         "name": "next"
@@ -21,6 +23,14 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "src/lib/spotify-playback.js",
+    "src/**/*.ts", // Include TypeScript files in src if needed
+    "src/global.d.ts"
+  ],
   "exclude": ["node_modules"]
 }
