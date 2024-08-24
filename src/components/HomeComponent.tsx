@@ -38,7 +38,6 @@ export default function HomeComponent() {
       description: partyDetails.description,
     };
     setActiveParty(newParty);
-    router.push("/party");
   };
 
   const handleLeaveParty = () => {
