@@ -22,7 +22,7 @@ export const useSongVotes = () => {
     }
   }
 
-  async function pickWinnerSong(): Promise<Track | undefined> {
+  async function pickWinnerSong(): Promise<string | undefined> {
     try {
       const { data, error } = await supabase
         .from("votesSongs")
@@ -41,7 +41,7 @@ export const useSongVotes = () => {
           counts[a] > counts[b] ? a : b
         );
 
-        return getTrack(mostCommonSongId);
+        return mostCommonSongId;
       }
     } catch (error) {
       throw error;

@@ -27,8 +27,8 @@ import {
 export default function HomePage() {
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-800 dark:text-white text-center">
-        Welcome to Music Voting
+      <h2 className="text-2xl font-bold text-gray-800 dark:text-white text-left">
+        Welcome İnanç
       </h2>
       <p className="text-gray-600 dark:text-gray-300 text-center">
         Join a party or create your own to start voting on tracks.
