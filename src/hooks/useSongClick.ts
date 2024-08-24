@@ -27,7 +27,6 @@ export const useSongClick = () => {
 
     let { data, error } = await supabase.rpc("get_votebox_sorted");
     if (error) console.error(error);
-    else console.log(data);
 
     return data || [];
   };
@@ -59,7 +58,6 @@ export const useSongClick = () => {
       user: { id },
     } = session;
 
-    console.log("Adding vote for song", song_id);
     addVote(song_id, id);
 
     const { data, error } = await supabase.from("VoteBox").insert({

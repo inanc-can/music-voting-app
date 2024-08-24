@@ -47,6 +47,14 @@ export async function playSong(id: string) {
     });
 }
 
+export async function addQueue(id: string) {
+  await api.player
+    .addItemToPlaybackQueue(`spotify:track:${id}`)
+    .catch((error) => {
+      console.error(error);
+    });
+}
+
 // Returns when the songs ends
 export async function songEnds() {
   const response = (await api.player.getPlaybackState()).is_playing;

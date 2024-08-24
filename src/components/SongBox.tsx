@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { playSong } from "@/lib/spotify";
-
+import { addQueue } from "@/lib/spotify";
 interface SongBoxProps {
   song_id: string;
   image: string;
@@ -14,8 +14,18 @@ interface SongBoxProps {
 
 export function SongBox(props: SongBoxProps) {
   const [songsVotes, setSongsVotes] = useState(0);
-  const handleSearchClick = () => {
-    playSong(props.song_id);
+  const handleClick = (event: { clientX: any; currentTarget: any }) => {
+    const { clientX, currentTarget } = event;
+    const { left, width } = currentTarget.getBoundingClientRect();
+    const clickPosition = clientX - left;
+
+    if (clickPosition < width / 2) {
+      playSong(props.song_id);
+      // Perform action for left half click
+    } else {
+      addQueue(props.song_id);
+      // Perform action for right half click
+    }
   };
   async function getSongsVotes(song_id: string) {
     try {
@@ -51,7 +61,6 @@ export function SongBox(props: SongBoxProps) {
           filter: `song_id=eq.${props.song_id}`,
         },
         (payload) => {
-          console.log("New vote added:", payload);
           setSongsVotes((prevVotes) => prevVotes + 1);
         }
       )
@@ -64,7 +73,7 @@ export function SongBox(props: SongBoxProps) {
   }, [props.song_id]);
 
   return (
-    <div onClick={handleSearchClick}>
+    <div onClick={handleClick}>
       <div className="w-48 h-48 relative p-8">
         <div className="absolute top-2 right-2 rounded-full text-md px-2 py-1 font-semibold">
           {songsVotes}

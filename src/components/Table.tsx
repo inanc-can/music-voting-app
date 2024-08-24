@@ -4,7 +4,7 @@ import { useSongClick } from "@/hooks/useSongClick";
 import SongBox from "@/components/SongBox";
 import { supabase } from "@/lib/supabase";
 
-type VoteBox1 = {
+type VoteBox = {
   song_id: string;
   image: string;
   title: string;
@@ -14,7 +14,7 @@ type VoteBox1 = {
 
 export function Table() {
   const { getSongClicks } = useSongClick();
-  const [results, setResults] = useState<VoteBox1[]>([]);
+  const [results, setResults] = useState<VoteBox[]>([]);
 
   const fetchAndSortSongs = useCallback(async () => {
     const response = await getSongClicks();
@@ -30,7 +30,6 @@ export function Table() {
         "postgres_changes",
         { event: "*", schema: "public", table: "votesSongs" },
         () => {
-          console.log("Vote change detected in votesSongs");
           fetchAndSortSongs();
         }
       )
@@ -42,7 +41,6 @@ export function Table() {
         "postgres_changes",
         { event: "*", schema: "public", table: "VoteBox" },
         () => {
-          console.log("Change detected in VoteBox");
           fetchAndSortSongs();
         }
       )
@@ -55,8 +53,8 @@ export function Table() {
   }, []);
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 justify-items-center">
-      {results.map((track: VoteBox1) => (
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 justify-items-center p-8">
+      {results.map((track: VoteBox) => (
         <SongBox
           key={track.song_id}
           image={track.image}

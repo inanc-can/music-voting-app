@@ -1,10 +1,6 @@
-import PlayBox from "@/components/PlayBar";
 import SearchBar from "@/components/SearchBar";
-import VoteBox from "@/components/Vote/VoteBox";
 import VoteTable from "@/components/Vote/VoteTable";
-import VoteBar from "@/components/Vote/VoteBar";
-import NavBar from "@/components/NavBar";
-
+import Table from "@/components/Table";
 export default async function Search({
   searchParams,
 }: {
@@ -22,7 +18,6 @@ export default async function Search({
         <SearchBar placeholder="Search a song" />
         <VoteTable query={query} currentPage={currentPage} />
       </div>
-      <NavBar />
     </div>
   );
 }
