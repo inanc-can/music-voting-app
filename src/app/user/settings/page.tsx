@@ -1,13 +1,10 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { useTheme } from "@/hooks/useTheme";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function Settings() {
-  const { theme, toggleTheme } = useTheme();
-  const [darkMode, setDarkMode] = useState(theme === "dark");
   const router = useRouter();
   const handleLogout = async () => {
     const response = await fetch("/auth/logout", {
@@ -28,14 +25,6 @@ export default function Settings() {
     <div className="space-y-6 text-gray-800 dark:text-white p-8">
       <h2 className="text-2xl font-bold">Settings</h2>
       <div className="space-y-4">
-        <div className="flex justify-between items-center bg-white dark:bg-gray-800 bg-opacity-70 dark:bg-opacity-30 backdrop-blur-md p-4 rounded-lg">
-          <span>Dark Mode</span>
-          <Switch
-            checked={darkMode}
-            onCheckedChange={setDarkMode}
-            className="data-[state=checked]:bg-purple-600"
-          />
-        </div>
         <div className="flex justify-between items-center bg-white dark:bg-gray-800 bg-opacity-70 dark:bg-opacity-30 backdrop-blur-md p-4 rounded-lg">
           <span>Notifications</span>
           <Button

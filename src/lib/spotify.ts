@@ -1,4 +1,5 @@
 import { PlaybackState, SpotifyApi, Track } from "@spotify/web-api-ts-sdk";
+import { supabase } from "./supabase";
 
 var api: SpotifyApi = {} as SpotifyApi;
 
@@ -39,7 +40,9 @@ export async function playSong(id: string) {
     .makeRequest("PUT", "me/player/play", {
       uris: [`spotify:track:${id}`],
     })
-    .then(() => {
+    .then(async () => {
+      await supabase.from("votesSongs").delete().eq("song_id", id);
+      await supabase.from("VoteBox").delete().eq("song_id", id);
       console.log("Song has been played");
     })
     .catch((error) => {
@@ -86,10 +89,9 @@ export async function get_state(): Promise<PlaybackState | undefined> {
     console.error(error);
   }
 }
-
-export async function duration(): Promise<number> {
+export async function duration(id: string): Promise<number> {
   try {
-    let state = (await api.player.getPlaybackState()).progress_ms;
+    let state = (await api.tracks.get(id)).duration_ms;
     return state;
   } catch (error) {
     console.error(error);

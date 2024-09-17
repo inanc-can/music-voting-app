@@ -27,7 +27,7 @@ export function VoteBox(props: VoteBoxProps) {
   return (
     <div
       onClick={handleSearchClick}
-      className="h-60 group overflow-hidden rounded-lg hover:shadow-lg active:shadow-2xl transition-all duration-300 hover:cursor-pointer"
+      className="h-60 group overflow-hidden rounded-lg hover:shadow-lg active:shadow-2xl transition-all duration-300 hover:cursor-pointer text-white"
     >
       <div className="w-48 h-48 relative p-8 hover:cursor-pointer">
         <div className="absolute top-2 right-2 rounded-full text-md px-2 py-1 font-semibold">

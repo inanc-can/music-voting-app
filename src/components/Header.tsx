@@ -1,8 +1,6 @@
 // components/Header.tsx
 "use client";
-import { useState } from "react";
 import Link from "next/link";
-import { useTheme } from "@/hooks/useTheme";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -22,8 +20,6 @@ import {
 } from "lucide-react";
 
 export default function Header() {
-  const { theme } = useTheme();
-
   return (
     <header className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 bg-opacity-70 dark:bg-opacity-30 backdrop-blur-md">
       <Sheet>

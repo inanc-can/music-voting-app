@@ -1,6 +1,5 @@
 import SearchBar from "@/components/SearchBar";
 import VoteTable from "@/components/Vote/VoteTable";
-import Table from "@/components/Table";
 export default async function Search({
   searchParams,
 }: {
@@ -13,7 +12,7 @@ export default async function Search({
   const currentPage = Number(searchParams?.page) || 1;
 
   return (
-    <div className="min-h-screen min-w-screen relative">
+    <div className="relative">
       <div className="mx-8 my-4">
         <SearchBar placeholder="Search a song" />
         <VoteTable query={query} currentPage={currentPage} />

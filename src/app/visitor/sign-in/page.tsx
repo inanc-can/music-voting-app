@@ -1,5 +1,7 @@
 "use client";
 
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -39,10 +41,10 @@ export default function Login() {
   };
 
   return (
-    <div className="container mx-auto w-[400px] grid gap-4">
-      <div className="grid">
-        <label>Email</label>
-        <input
+    <div className="container mx-auto  w-[400px] grid gap-4 place-items-center">
+      <div className="grid space-y-4 w-full">
+        <Label>E-Mail</Label>
+        <Input
           type="text"
           name="email"
           value={data?.email}
@@ -50,9 +52,9 @@ export default function Login() {
           className="text-black"
         />
       </div>
-      <div className="grid">
-        <label>Password</label>
-        <input
+      <div className="grid w-full">
+        <Label>Password</Label>
+        <Input
           type="password"
           name="password"
           value={data?.password}
