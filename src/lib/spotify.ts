@@ -6,7 +6,7 @@ var api: SpotifyApi = {} as SpotifyApi;
 try {
   api = SpotifyApi.withUserAuthorization(
     "c77ff24e513d453abac0ffaa125b5d12",
-    "http://localhost:3000",
+    "https://music-voting-app.vercel.app/",
     [
       "user-read-playback-state",
       "user-modify-playback-state",
