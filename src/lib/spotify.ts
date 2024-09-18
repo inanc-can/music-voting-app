@@ -3,16 +3,15 @@ import { supabase } from "./supabase";
 
 var api: SpotifyApi = {} as SpotifyApi;
 
+const CLIENT_ID = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID || "";
+const REDIRECT_URI = process.env.NEXT_PUBLIC_SPOTIFY_REDIRECT_URL || "";
+
 try {
-  api = SpotifyApi.withUserAuthorization(
-    "c77ff24e513d453abac0ffaa125b5d12",
-    "https://music-voting-app.vercel.app/",
-    [
-      "user-read-playback-state",
-      "user-modify-playback-state",
-      "user-read-currently-playing",
-    ]
-  );
+  api = SpotifyApi.withUserAuthorization(CLIENT_ID, REDIRECT_URI, [
+    "user-read-playback-state",
+    "user-modify-playback-state",
+    "user-read-currently-playing",
+  ]);
 } catch (error: any) {
   if (error.response && error.response.status === 503) {
     console.error("Service Unavailable: Please try again later.");
