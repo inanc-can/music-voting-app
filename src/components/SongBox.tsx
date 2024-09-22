@@ -74,7 +74,7 @@ export function SongBox(props: SongBoxProps) {
 
   return (
     <div onClick={handleClick}>
-      <div className="w-48 h-48 relative p-8">
+      <div className="w-48 h-48 relative p-8 text-white">
         <div className="absolute top-2 right-2 rounded-full text-md px-2 py-1 font-semibold">
           {songsVotes}
         </div>
