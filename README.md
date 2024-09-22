@@ -1,3 +1,18 @@
+This app allows listeners to vote for the next song.
+
+<img width="520" alt="Screenshot 2024-09-22 at 14 43 16" src="https://github.com/user-attachments/assets/24735d2b-a199-4503-a37e-63c824563265">
+
+
+You search for the song you want to play for.
+
+
+<img width="1502" alt="Screenshot 2024-09-22 at 14 45 30" src="https://github.com/user-attachments/assets/22ed6357-e1d8-4eb4-b49c-f981a2a899cf">
+
+
+The song with the most votes will be played when the song that is currently playing ends.
+
+This product is currently in development and nıt finished.
+
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
