@@ -1,7 +1,6 @@
 import { supabase } from "@/lib/supabase";
 import { useState } from "react";
 import { Track } from "@spotify/web-api-ts-sdk";
-import { getTrack } from "@/lib/spotify";
 
 export const useSongVotes = () => {
   const [songsVotes, setSongsVotges] = useState<number>();

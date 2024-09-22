@@ -45,17 +45,33 @@ const VoteTable: React.FC<TableProps> = ({ query, currentPage }) => {
         setResults(topVotedSongs.slice(0, 16));
         return;
       }
-      const response = await search(query);
-      const convertedResults = await Promise.all(
-        response!.tracks.items.map(async (track: Track) => ({
-          title: track.name,
-          artist: track.artists[0].name,
-          image: track.album.images[0].url,
-          song_id: track.id,
-          votes: await getSongsVotes(track.id),
-        }))
-      );
-      setResults(convertedResults.slice(0, 16));
+      try {
+        const response = await fetch("/api/spotify/search", {
+          method: "POST",
+          body: JSON.stringify({ searchTerm: query }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const convertedResults = await Promise.all(
+            data.map(async (track: any) => ({
+              song_id: track.song_id,
+              image: track.image,
+              title: track.title,
+              artist: track.artist,
+              votes: await getSongsVotes(track.song_id),
+            }))
+          );
+          setResults(convertedResults.slice(0, 16));
+        } else {
+          console.error("Failed to fetch search results");
+        }
+      } catch (error) {
+        console.error("An error occurred while searching", error);
+      }
     };
 
     fetchResults();
