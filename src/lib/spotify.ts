@@ -3,8 +3,8 @@ import { supabase } from "../lib/supabase";
 
 var api: SpotifyApi = {} as SpotifyApi;
 
-const CLIENT_ID = process.env.SPOTIFY_CLIENT_ID || "";
-const REDIRECT_URI = process.env.SPOTIFY_REDIRECT_URL || "";
+const CLIENT_ID = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID || "";
+const REDIRECT_URI = process.env.NEXT_PUBLIC_SPOTIFY_REDIRECT_URL || "";
 
 try {
   api = SpotifyApi.withUserAuthorization(CLIENT_ID, REDIRECT_URI, [
