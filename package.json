@@ -34,7 +34,6 @@
     "spotify-web-api-js": "^1.5.2",
     "spotify-web-api-node": "^5.0.2",
     "spotify-web-playback": "^1.4.0",
-    "spotify-web-playback-sdk-for-react": "^2.0.3",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
     "use-debounce": "^10.0.1",

@@ -25,6 +25,7 @@ export default function Login() {
       });
 
       if (dataUser) {
+        router.push("/");
         router.refresh();
       }
     } catch (error) {

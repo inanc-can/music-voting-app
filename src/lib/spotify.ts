@@ -1,5 +1,5 @@
 import { PlaybackState, SpotifyApi, Track } from "@spotify/web-api-ts-sdk";
-import { supabase } from "../lib/supabase";
+import { supabase } from "./supabase";
 
 var api: SpotifyApi = {} as SpotifyApi;
 
@@ -17,15 +17,6 @@ try {
     console.error("Service Unavailable: Please try again later.");
   } else {
     console.error("An error occurred during authorization:", error);
-  }
-}
-
-export async function search(query: string) {
-  try {
-    const response = await api.search(query, ["track"]);
-    return response;
-  } catch (error) {
-    console.error(error);
   }
 }
 
@@ -57,37 +48,6 @@ export async function addQueue(id: string) {
     });
 }
 
-// Returns when the songs ends
-export async function songEnds() {
-  const response = (await api.player.getPlaybackState()).is_playing;
-  return response;
-}
-
-// Returns when the songs ends
-export async function activeDevice() {
-  const response = (await api.player.getPlaybackState()).device;
-  return response;
-}
-
-// Returns the song currently playing
-export async function currentlyPlaying() {
-  let response;
-  try {
-    response = (await api.player.getCurrentlyPlayingTrack()).item as Track;
-  } catch (error) {
-    console.error(error);
-  }
-  return response;
-}
-
-export async function get_state(): Promise<PlaybackState | undefined> {
-  try {
-    let state = await api.player.getPlaybackState();
-    return state;
-  } catch (error) {
-    console.error(error);
-  }
-}
 export async function duration(id: string): Promise<number> {
   try {
     let state = (await api.tracks.get(id)).duration_ms;

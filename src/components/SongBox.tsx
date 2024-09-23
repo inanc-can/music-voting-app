@@ -4,6 +4,8 @@ import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { playSong } from "@/lib/spotify";
 import { addQueue } from "@/lib/spotify";
+import { Badge } from "./ui/badge";
+import Image from "next/image";
 interface SongBoxProps {
   song_id: string;
   image: string;
@@ -14,6 +16,10 @@ interface SongBoxProps {
 
 export function SongBox(props: SongBoxProps) {
   const [songsVotes, setSongsVotes] = useState(0);
+  const [message, setMessage] = useState("");
+  const [showMessage, setShowMessage] = useState(false);
+  const [messageOpacity, setMessageOpacity] = useState(0);
+
   const handleClick = (event: { clientX: any; currentTarget: any }) => {
     const { clientX, currentTarget } = event;
     const { left, width } = currentTarget.getBoundingClientRect();
@@ -21,11 +27,22 @@ export function SongBox(props: SongBoxProps) {
 
     if (clickPosition < width / 2) {
       playSong(props.song_id);
+      setMessage("Song is Played");
+
       // Perform action for left half click
     } else {
       addQueue(props.song_id);
+      setMessage("Added to Queue");
+
       // Perform action for right half click
     }
+    setShowMessage(true);
+    setMessageOpacity(1);
+
+    setTimeout(() => {
+      setMessageOpacity(0);
+      setTimeout(() => setShowMessage(false), 1000); // Hide message after fade out
+    }, 1000); // Fade out after 1 second
   };
   async function getSongsVotes(song_id: string) {
     try {
@@ -78,15 +95,27 @@ export function SongBox(props: SongBoxProps) {
         <div className="absolute top-2 right-2 rounded-full text-md px-2 py-1 font-semibold">
           {songsVotes}
         </div>
-        <img
+        <Image
           src={props.image}
           alt="Song Cover"
-          className="w-full h-full object-cover rounded-lg hover:scale-105 "
+          width={256}
+          height={256}
+          className="w-full h-full object-cover rounded-lg group-hover:scale-105 transition-transform duration-300"
         />
         <div className="mt-4 text-center">
           <p className="text-sm font-semibold">{props.songName}</p>
           <p className="text-xs">{props.artist}</p>
         </div>
+        {showMessage && (
+          <div
+            className="absolute top-1/2 transform transition-opacity duration-1000"
+            style={{ opacity: messageOpacity }}
+          >
+            <Badge variant="secondary" className="py-2 px-6 ">
+              {message}
+            </Badge>
+          </div>
+        )}
       </div>
     </div>
   );

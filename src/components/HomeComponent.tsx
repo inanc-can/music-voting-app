@@ -50,15 +50,7 @@ export default function HomeComponent() {
       <div className="absolute bottom-24 left-0 right-0 flex justify-center">
         <div></div>
         <Button
-          onClick={async () => {
-            const winnerSong = await pickWinnerSong();
-            if (winnerSong) playSong(winnerSong);
-          }}
-        >
-          Play the Most Popular Song
-        </Button>
-        <Button
-          variant={"ghost"}
+          variant={"secondary"}
           onClick={() => {
             setParty(true);
           }}

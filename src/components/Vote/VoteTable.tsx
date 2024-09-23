@@ -1,8 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { search } from "@/lib/spotify";
 import VoteBox from "@/components/Vote/VoteBox";
-import { Track } from "@spotify/web-api-ts-sdk";
 import { supabase } from "@/lib/supabase";
 import { useSongClick } from "@/hooks/useSongClick"; // Add this import
 
