@@ -3,6 +3,7 @@ import { Space_Grotesk } from "next/font/google";
 import Footer from "@/components/Footer";
 import "../globals.css";
 const inter = Space_Grotesk({ subsets: ["latin"] });
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export const metadata = {
   title: "Music Voting App",
@@ -20,6 +21,8 @@ export default function RootLayout({
         className={`${inter.className} flex flex-col min-h-screen bg-gradient-to-br from-gray-800 via-gray-200 to-gray-300 dark:from-gray-900 dark:via-purple-900 dark:to-indigo-900 transition-colors duration-300`}
       >
         <main className="flex-grow">{children}</main>
+        <SpeedInsights />
+
         <Footer />
       </body>
     </html>
