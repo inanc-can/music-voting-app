@@ -1,8 +1,8 @@
 // app/layout.tsx
-import { Space_Grotesk } from "next/font/google";
+import { Inter } from "next/font/google";
 import Footer from "@/components/Footer";
 import "../globals.css";
-const inter = Space_Grotesk({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"] });
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export const metadata = {

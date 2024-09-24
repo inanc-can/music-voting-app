@@ -1,7 +1,7 @@
 // app/layout.tsx
 "use client";
-import { Space_Grotesk } from "next/font/google";
-const inter = Space_Grotesk({ subsets: ["latin"] });
+import { Inter } from "next/font/google";
+const inter = Inter({ subsets: ["latin"] });
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import "../globals.css";
