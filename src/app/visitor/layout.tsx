@@ -21,15 +21,6 @@ export default function RootLayout({
       >
         <main className="flex-grow">{children}</main>
         <SpeedInsights />
-
-        <div className="flex justify-evenly mb-12">
-          <Button
-            variant="secondary"
-            onClick={() => router.push("visitor/sign-in")}
-          >
-            Sign In
-          </Button>
-        </div>
       </body>
     </html>
   );
