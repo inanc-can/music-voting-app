@@ -90,10 +90,13 @@ export function SongBox(props: SongBoxProps) {
   }, [props.song_id]);
 
   return (
-    <div onClick={handleClick}>
-      <div className="w-48 h-48 relative p-8 text-white">
+    <div
+      onClick={handleClick}
+      className="h-60 group overflow-hidden rounded-lg hover:shadow-lg active:shadow-2xl transition-all duration-300 hover:cursor-pointer text-white"
+    >
+      <div className="w-48 h-48 relative p-8 hover:cursor-pointer">
         <div className="absolute top-2 right-2 rounded-full text-md px-2 py-1 font-semibold">
-          {songsVotes}
+          {props.votes}
         </div>
         <Image
           src={props.image}
@@ -112,7 +115,7 @@ export function SongBox(props: SongBoxProps) {
             style={{ opacity: messageOpacity }}
           >
             <Badge variant="secondary" className="py-2 px-6 ">
-              {message}
+              Vote Added!
             </Badge>
           </div>
         )}
