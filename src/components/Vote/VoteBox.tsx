@@ -1,9 +1,9 @@
 "use client";
-import React, { useState } from "react";
+import React, { Suspense, useState } from "react";
 import { useSongClick } from "@/hooks/useSongClick";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
-
+import { VoteBoxSkeleton } from "@/components/skeletons/VoteBoxSkeleton";
 interface VoteBoxProps {
   image: string;
   artist: string;
