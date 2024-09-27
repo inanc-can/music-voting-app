@@ -115,7 +115,7 @@ export function SongBox(props: SongBoxProps) {
             style={{ opacity: messageOpacity }}
           >
             <Badge variant="secondary" className="py-2 px-6 ">
-              Vote Added!
+              {message}
             </Badge>
           </div>
         )}
