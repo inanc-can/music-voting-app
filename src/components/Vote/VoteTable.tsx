@@ -86,8 +86,20 @@ const VoteTable: React.FC<TableProps> = ({ query, currentPage }) => {
       )
       .subscribe();
 
+    const voteBoxChannel = supabase
+      .channel("votes-channel")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "VoteBox" },
+        () => {
+          fetchResults();
+        }
+      )
+      .subscribe();
+
     return () => {
       supabase.removeChannel(voteChannel);
+      supabase.removeChannel(voteBoxChannel);
     };
   }, [query, currentPage, useSongClick]);
 

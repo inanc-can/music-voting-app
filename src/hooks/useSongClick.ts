@@ -33,6 +33,33 @@ export const useSongClick = () => {
       user_id = getTemporaryUserId();
     }
 
+    // Check if the user has already voted for this song
+    const { data: existingVote, error: fetchError } = await supabase
+      .from("votesSongs")
+      .select("*")
+      .eq("user_id", user_id)
+      .single();
+
+    if (fetchError && fetchError.code !== "PGRST116") {
+      // PGRST116 is the code for no rows found
+      console.error("Error fetching existing vote:", fetchError);
+      return;
+    }
+
+    // If a vote exists, delete the previous vote
+    if (existingVote) {
+      const { error: deleteError } = await supabase
+        .from("votesSongs")
+        .delete()
+        .eq("user_id", user_id);
+
+      if (deleteError) {
+        console.error("Error deleting existing vote:", deleteError);
+        return;
+      }
+    }
+
+    // Insert the new vote
     const { data, error } = await supabase.from("votesSongs").insert({
       song_id,
       user_id,
