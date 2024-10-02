@@ -93,35 +93,12 @@ const VoteTable: React.FC<TableProps> = ({ query, currentPage }) => {
         }
       });
 
-    const voteBoxChannel = supabase
-      .channel("votes-channel")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "VoteBox" },
-        () => {
-          console.log("VoteBox Change");
-          fetchResults();
-        }
-      )
-      .subscribe((status) => {
-        if (status === "SUBSCRIBED") {
-          console.log("Subscribed to VoteBox changes");
-        } else {
-          console.error("Subscription to VoteBox failed", status);
-        }
-      });
-
-    // Cleanup function to remove channels when component unmounts
     return () => {
       if (voteChannel) {
         supabase.removeChannel(voteChannel);
       }
-      if (voteBoxChannel) {
-        supabase.removeChannel(voteBoxChannel);
-      }
     };
-    // Empty dependency array ensures this effect runs only once
-  }, []);
+  }, [query, currentPage]);
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 justify-items-center transition-all duration-300">

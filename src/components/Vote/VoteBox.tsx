@@ -44,7 +44,7 @@ export function VoteBox(props: VoteBoxProps) {
       .on(
         "postgres_changes",
         {
-          event: "INSERT",
+          event: "*",
           schema: "public",
           table: "votesSongs",
         },
