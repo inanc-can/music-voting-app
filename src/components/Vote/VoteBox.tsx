@@ -1,7 +1,8 @@
 "use client";
-import React, { Suspense, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import { useSongClick } from "@/hooks/useSongClick";
 import Image from "next/image";
+import { supabase } from "@/lib/supabase";
 interface VoteBoxProps {
   image: string;
   artist: string;
@@ -13,6 +14,53 @@ interface VoteBoxProps {
 
 export function VoteBox(props: VoteBoxProps) {
   const { newSongClick } = useSongClick();
+  const [songsVotes, setSongsVotes] = useState(props.votes);
+
+  async function getSongsVotes(song_id: string) {
+    try {
+      const { data, error } = await supabase
+        .from("votesSongs")
+        .select("song_id")
+        .eq("song_id", song_id);
+
+      if (data) {
+        return data.length;
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  }
+
+  useEffect(() => {
+    const fetchVotes = async () => {
+      const votes = await getSongsVotes(props.song_id);
+      setSongsVotes(votes || 0);
+    };
+    fetchVotes();
+
+    // Set up the real-time subscription
+    const channel = supabase
+      .channel(`song-votes-${props.song_id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "votesSongs",
+        },
+        (payload) => {
+          getSongsVotes(props.song_id).then((votes) =>
+            setSongsVotes(votes || 0)
+          );
+        }
+      )
+      .subscribe();
+
+    // Clean up the subscription when the component unmounts
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [props.song_id]);
 
   async function handleSearchClick() {
     try {
@@ -30,7 +78,7 @@ export function VoteBox(props: VoteBoxProps) {
     >
       <div className="w-48 h-48 relative p-8 hover:cursor-pointer">
         <div className="absolute top-2 right-2 rounded-full text-md px-2 py-1 font-semibold">
-          {props.votes}
+          {songsVotes}
         </div>
         <Image
           src={props.image}

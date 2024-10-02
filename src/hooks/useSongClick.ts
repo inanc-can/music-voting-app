@@ -70,22 +70,46 @@ export const useSongClick = () => {
     }
   };
 
+  const addVotebox = async (
+    song_id: string,
+    image: string,
+    title: string,
+    artist: string
+  ) => {
+    const { data: existingSong, error: fetchError } = await supabase
+      .from("VoteBox")
+      .select("*")
+      .eq("song_id", song_id)
+      .single();
+
+    if (fetchError && fetchError.code !== "PGRST116") {
+      // PGRST116 is the code for no rows found
+      console.error("Error fetching existing song:", fetchError);
+      return;
+    }
+
+    if (!existingSong) {
+      const { data, error } = await supabase.from("VoteBox").insert({
+        song_id,
+        image,
+        title,
+        artist,
+      });
+
+      if (error) {
+        console.error("Error adding song to VoteBox:", error);
+      }
+    }
+  };
+
   const newSongClick = async (
     song_id: string,
     image: string,
     title: string,
     artist: string
   ) => {
-    addVote(song_id, null);
-
-    const { data, error } = await supabase.from("VoteBox").insert({
-      song_id,
-      image,
-      title,
-      artist,
-    });
-
-    return data;
+    await addVote(song_id, null);
+    await addVotebox(song_id, image, title, artist);
   };
 
   return { songClicks, getSongClicks, newSongClick };
