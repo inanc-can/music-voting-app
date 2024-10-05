@@ -81,7 +81,6 @@ const VoteTable: React.FC<TableProps> = ({ query, currentPage }) => {
         "postgres_changes",
         { event: "*", schema: "public", table: "votesSongs" },
         () => {
-          console.log("Vote Change");
           fetchResults();
         }
       )

@@ -3,6 +3,7 @@ import React, { Suspense, useEffect, useState } from "react";
 import { useSongClick } from "@/hooks/useSongClick";
 import Image from "next/image";
 import { supabase } from "@/lib/supabase";
+
 interface VoteBoxProps {
   image: string;
   artist: string;
@@ -15,6 +16,8 @@ interface VoteBoxProps {
 export function VoteBox(props: VoteBoxProps) {
   const { newSongClick } = useSongClick();
   const [songsVotes, setSongsVotes] = useState(props.votes);
+  const [loading, setLoading] = useState(false);
+  const [animationClass, setAnimationClass] = useState("");
 
   async function getSongsVotes(song_id: string) {
     try {
@@ -32,13 +35,18 @@ export function VoteBox(props: VoteBoxProps) {
   }
 
   useEffect(() => {
+    setAnimationClass("animate-slideIn");
+    const timeout = setTimeout(() => setAnimationClass(""), 1000); // Remove animation class after 1 second
+    return () => clearTimeout(timeout);
+  }, [songsVotes]);
+
+  useEffect(() => {
     const fetchVotes = async () => {
       const votes = await getSongsVotes(props.song_id);
       setSongsVotes(votes || 0);
     };
     fetchVotes();
 
-    // Set up the real-time subscription
     const channel = supabase
       .channel(`song-votes-${props.song_id}`)
       .on(
@@ -56,18 +64,20 @@ export function VoteBox(props: VoteBoxProps) {
       )
       .subscribe();
 
-    // Clean up the subscription when the component unmounts
     return () => {
       supabase.removeChannel(channel);
     };
   }, [props.song_id]);
 
   async function handleSearchClick() {
+    setLoading(true);
     try {
       newSongClick(props.song_id, props.image, props.songName, props.artist);
-      props.onVote(props.song_id);
+      await props.onVote(props.song_id);
     } catch (error) {
       console.error("Error adding vote:", error);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -77,7 +87,9 @@ export function VoteBox(props: VoteBoxProps) {
       className="h-60 group overflow-hidden rounded-lg hover:shadow-lg active:shadow-2xl active:brightness-110 transition-all duration-300 hover:cursor-pointer text-white"
     >
       <div className="w-48 h-48 relative p-8 hover:cursor-pointer">
-        <div className="absolute top-2 right-2 rounded-full text-md px-2 py-1 font-semibold">
+        <div
+          className={`absolute top-2 right-2 rounded-full text-md px-2 py-1 font-semibold ${animationClass}`}
+        >
           {songsVotes}
         </div>
         <Image
