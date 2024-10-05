@@ -14,7 +14,7 @@
 }
 
 .animate-slideIn {
-  animation: slideIn 0.7s ease-in-out;
+  animation: slideIn 1ms ease-in-out;
 }
 
 @keyframes switchPlace {

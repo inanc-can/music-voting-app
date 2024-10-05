@@ -108,7 +108,7 @@ const VoteTable: React.FC<TableProps> = ({ query, currentPage }) => {
 
   return (
     <div
-      className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 justify-items-center transition-all ${animationClass}`}
+      className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 justify-items-center ${animationClass}`}
     >
       {results.map((track: any, key: number) => (
         <Suspense fallback={<VoteBoxSkeleton />} key={key}>

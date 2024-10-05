@@ -84,7 +84,7 @@ export function VoteBox(props: VoteBoxProps) {
   return (
     <div
       onClick={handleSearchClick}
-      className="h-60 group overflow-hidden rounded-lg hover:shadow-lg active:shadow-2xl active:brightness-110 transition-all duration-300 hover:cursor-pointer text-white"
+      className={`h-60 group overflow-hidden rounded-lg hover:shadow-lg active:shadow-2xl active:brightness-110 transition-all duration-300 hover:cursor-pointer text-white`}
     >
       <div className="w-48 h-48 relative p-8 hover:cursor-pointer">
         <div
@@ -101,7 +101,7 @@ export function VoteBox(props: VoteBoxProps) {
         />
         <div className="mt-4 text-center">
           <p className="text-sm font-semibold">{props.songName}</p>
-          <p className="text-xs">{props.artist}</p>
+          <p className="text-xs mt-1">{props.artist}</p>
         </div>
       </div>
     </div>
