@@ -36,7 +36,7 @@ export function VoteBox(props: VoteBoxProps) {
 
   useEffect(() => {
     setAnimationClass("animate-slideIn");
-    const timeout = setTimeout(() => setAnimationClass(""), 1000); // Remove animation class after 1 second
+    const timeout = setTimeout(() => setAnimationClass(""), 500); // Remove animation class after 1 second
     return () => clearTimeout(timeout);
   }, [songsVotes]);
 

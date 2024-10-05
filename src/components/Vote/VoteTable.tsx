@@ -36,6 +36,7 @@ async function getSongsVotes(song_id: string) {
 const VoteTable: React.FC<TableProps> = ({ query, currentPage }) => {
   const [results, setResults] = useState<VoteBox[]>([]);
   const { getSongClicks } = useSongClick(); // Add this line
+  const [animationClass, setAnimationClass] = useState("");
 
   useEffect(() => {
     const fetchResults = async () => {
@@ -99,8 +100,16 @@ const VoteTable: React.FC<TableProps> = ({ query, currentPage }) => {
     };
   }, [query, currentPage]);
 
+  useEffect(() => {
+    setAnimationClass("animate-switchPlace");
+    const timeout = setTimeout(() => setAnimationClass(""), 1000); // Remove animation class after 1 second
+    return () => clearTimeout(timeout);
+  }, [results]);
+
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 justify-items-center transition-all duration-300">
+    <div
+      className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 justify-items-center transition-all ${animationClass}`}
+    >
       {results.map((track: any, key: number) => (
         <Suspense fallback={<VoteBoxSkeleton />} key={key}>
           <VoteBox
