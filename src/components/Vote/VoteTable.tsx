@@ -1,5 +1,5 @@
 "use client";
-import React, { Suspense, useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState, useRef } from "react";
 const VoteBox = React.lazy(() => import("./VoteBox")); // Dynamically import VoteBox
 import { supabase } from "@/lib/supabase";
 import { useSongClick } from "@/hooks/useSongClick"; // Add this import
@@ -36,7 +36,6 @@ async function getSongsVotes(song_id: string) {
 const VoteTable: React.FC<TableProps> = ({ query, currentPage }) => {
   const [results, setResults] = useState<VoteBox[]>([]);
   const { getSongClicks } = useSongClick(); // Add this line
-  const [animationClass, setAnimationClass] = useState("");
 
   useEffect(() => {
     const fetchResults = async () => {
@@ -100,15 +99,9 @@ const VoteTable: React.FC<TableProps> = ({ query, currentPage }) => {
     };
   }, [query, currentPage]);
 
-  useEffect(() => {
-    setAnimationClass("animate-switchPlace");
-    const timeout = setTimeout(() => setAnimationClass(""), 1000); // Remove animation class after 1 second
-    return () => clearTimeout(timeout);
-  }, [results]);
-
   return (
     <div
-      className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 justify-items-center ${animationClass}`}
+      className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 justify-items-center`}
     >
       {results.map((track: any, key: number) => (
         <Suspense fallback={<VoteBoxSkeleton />} key={key}>
