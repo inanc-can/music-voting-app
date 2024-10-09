@@ -17,19 +17,6 @@
   animation: slideIn 0.7s ease-in-out;
 }
 
-@keyframes switchPlace {
-  from {
-    transform: translateX(0);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0px);
-    opacity: 1;
-  }
-}
-.animate-switchPlace {
-  animation: switchPlace 0.5s ease-in-out;
-}
 @layer base {
   :root {
     --background: 0 0% 100%;

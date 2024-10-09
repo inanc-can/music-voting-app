@@ -42,17 +42,6 @@ export function VoteBox(props: VoteBoxProps) {
   }, [songsVotes]);
 
   useEffect(() => {
-    // Set animation class on mount
-    setAnimationBoxClass("animate-switchPlace");
-
-    // Set timeout to remove animation class after 1 second
-    const timeout = setTimeout(() => setAnimationBoxClass(""), 1000);
-
-    // Cleanup function to clear timeout on unmount
-    return () => clearTimeout(timeout);
-  }, []);
-
-  useEffect(() => {
     const fetchVotes = async () => {
       const votes = await getSongsVotes(props.song_id);
       setSongsVotes(votes || 0);
@@ -84,7 +73,24 @@ export function VoteBox(props: VoteBoxProps) {
   async function handleSearchClick() {
     setLoading(true);
     try {
-      newSongClick(props.song_id, props.image, props.songName, props.artist);
+      // Make a POST request to the server-side route
+      const response = await fetch("/api/supabase/vote", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          song_id: props.song_id,
+          image: props.image,
+          title: props.songName,
+          artist: props.artist,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to add vote");
+      }
+
       await props.onVote(props.song_id);
     } catch (error) {
       console.error("Error adding vote:", error);
@@ -96,7 +102,7 @@ export function VoteBox(props: VoteBoxProps) {
   return (
     <div
       onClick={handleSearchClick}
-      className={`h-60 group overflow-hidden rounded-lg hover:shadow-lg active:shadow-2xl active:brightness-110 transition-all duration-300 hover:cursor-pointer text-white ${animationBoxClass}`}
+      className={`h-60 group overflow-hidden rounded-lg hover:shadow-lg active:shadow-2xl active:brightness-110 transition-all duration-300 hover:cursor-pointer text-white`}
     >
       <div className="w-48 h-48 relative p-8 hover:cursor-pointer">
         <div
