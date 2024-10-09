@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
       .eq("user_id", userId)
       .single();
 
-    if (fetchError) {
+    if (fetchError && fetchError.code !== "PGRST116") {
       console.error(fetchError);
       return NextResponse.json(
         { error: "Error fetching existing vote" },
