@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
 
     // Check if the user has already voted for this song
     const { data: existingVote, error: fetchError } = await supabase
-      .from("votes")
+      .from("votesSongs")
       .select("*")
       .eq("user_id", userId)
       .single();
