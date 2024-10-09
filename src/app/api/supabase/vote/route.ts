@@ -85,9 +85,10 @@ export async function POST(req: NextRequest) {
     }
 
     // Add the vote
-    const { error: insertError } = await supabase
-      .from("votes")
-      .insert([{ song_id, user_id: userId }]);
+    const { error: insertError } = await supabase.from("votesSongs").insert({
+      song_id,
+      userId,
+    });
 
     if (insertError) {
       console.error(insertError);
