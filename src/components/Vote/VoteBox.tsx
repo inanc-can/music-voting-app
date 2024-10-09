@@ -3,6 +3,7 @@ import React, { Suspense, useEffect, useState } from "react";
 import { useSongClick } from "@/hooks/useSongClick";
 import Image from "next/image";
 import { supabase } from "@/lib/supabase";
+import { v4 as uuidv4 } from "uuid";
 
 interface VoteBoxProps {
   image: string;
@@ -80,6 +81,7 @@ export function VoteBox(props: VoteBoxProps) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          user_id: uuidv4(),
           song_id: props.song_id,
           image: props.image,
           title: props.songName,

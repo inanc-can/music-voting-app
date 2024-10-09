@@ -16,7 +16,7 @@ type VoteBox = {
 
 export async function POST(req: NextRequest) {
   try {
-    const { song_id, image, title, artist } = await req.json();
+    const { user_id, song_id, image, title, artist } = await req.json();
 
     if (!song_id) {
       return NextResponse.json(
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
     const { data: existingVote, error: fetchError } = await supabase
       .from("votesSongs")
       .select("*")
-      .eq("user_id", userId)
+      .eq("user_id", user_id)
       .single();
 
     if (fetchError && fetchError.code !== "PGRST116") {
@@ -87,7 +87,7 @@ export async function POST(req: NextRequest) {
     // Add the vote
     const { error: insertError } = await supabase.from("votesSongs").insert({
       song_id,
-      user_id: userId,
+      user_id: user_id,
     });
 
     if (insertError) {
