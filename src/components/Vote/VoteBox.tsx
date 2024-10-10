@@ -74,10 +74,7 @@ export function VoteBox(props: VoteBoxProps) {
   async function handleSearchClick() {
     setLoading(true);
     try {
-      // Make a POST request to the server-side route
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+      const user = supabase.auth.getUser;
       if (!user) {
         throw new Error("User not authenticated");
       }
