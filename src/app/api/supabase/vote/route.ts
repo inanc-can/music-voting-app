@@ -6,13 +6,6 @@ const supabaseUrl = process.env.SUPABASE_URL!;
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
 
-type VoteBox = {
-  song_id: string;
-  image: string;
-  title: string;
-  artist: string;
-};
-
 export async function POST(req: NextRequest) {
   try {
     const { user_id, song_id, image, title, artist } = await req.json();

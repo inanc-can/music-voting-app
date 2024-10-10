@@ -75,13 +75,20 @@ export function VoteBox(props: VoteBoxProps) {
     setLoading(true);
     try {
       // Make a POST request to the server-side route
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error("User not authenticated");
+      }
+
       const response = await fetch("/api/supabase/vote", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          user_id: supabase.auth.getUser,
+          user_id: user.id,
           song_id: props.song_id,
           image: props.image,
           title: props.songName,
