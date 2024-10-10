@@ -1,6 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
-import { v4 as uuidv4 } from "uuid";
 
 // Initialize Supabase client for server-side
 const supabaseUrl = process.env.SUPABASE_URL!;
@@ -24,9 +23,6 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-
-    const userId = uuidv4();
-
     // Check if the user has already voted for this song
     const { data: existingVote, error: fetchError } = await supabase
       .from("votesSongs")

@@ -81,7 +81,7 @@ export function VoteBox(props: VoteBoxProps) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          user_id: uuidv4(),
+          user_id: supabase.auth.getUser,
           song_id: props.song_id,
           image: props.image,
           title: props.songName,
