@@ -12,15 +12,25 @@ export default async function Search({
 }) {
   const query = searchParams?.query || "";
   const currentPage = Number(searchParams?.page) || 1;
-  const { data: authData, error: authError } =
-    await supabase.auth.signInAnonymously();
+  // Check if the user is already authenticated
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
 
-  if (authError) {
-    console.error("Error during anonymous sign-in:", authError.message);
+  // If the user is not authenticated, sign in anonymously
+  if (!user) {
+    const { data: authData, error: authError } =
+      await supabase.auth.signInAnonymously();
+
+    if (authError) {
+      console.error("Error during anonymous sign-in:", authError.message);
+    } else {
+      console.log("Anonymous user signed in:", authData);
+    }
   } else {
-    console.log(authData);
+    console.log("User is already authenticated:", user);
   }
-
   return (
     <div className="relative min-h-screen">
       <div className="mx-8 my-4">
