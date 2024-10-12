@@ -1,8 +1,9 @@
 "use client";
-import React, { Suspense, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSongClick } from "@/hooks/useSongClick";
 import Image from "next/image";
 import { supabase } from "@/lib/supabase";
+import { toast } from "sonner";
 
 interface VoteBoxProps {
   image: string;
@@ -107,6 +108,8 @@ export function VoteBox(props: VoteBoxProps) {
 
       if (!response.ok) {
         throw new Error("Failed to add vote");
+      } else {
+        toast.success("Vote added successfully");
       }
     } catch (error) {
       console.error("Error adding vote:", error);

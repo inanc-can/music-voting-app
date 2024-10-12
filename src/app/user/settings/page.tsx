@@ -1,7 +1,5 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function Settings() {
