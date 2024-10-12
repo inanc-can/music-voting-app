@@ -107,9 +107,10 @@ export function VoteBox(props: VoteBoxProps) {
       });
 
       if (!response.ok) {
+        toast("Failed to add vote");
         throw new Error("Failed to add vote");
       } else {
-        toast.success("Vote added successfully");
+        toast("Vote added successfully");
       }
     } catch (error) {
       console.error("Error adding vote:", error);
