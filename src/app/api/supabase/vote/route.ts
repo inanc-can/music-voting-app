@@ -69,25 +69,34 @@ const addVoteBox = async (
   title: string,
   artist: string
 ) => {
-  // Check if the user has already voted for this song
+  // Check if the song already exists in the VoteBox
   const { data: existingVote, error: fetchError } = await supabase
     .from("VoteBox")
     .select("*")
     .eq("song_id", song_id)
     .single();
 
-  if (existingVote !== null) {
+  if (fetchError && fetchError.code !== "PGRST116") {
+    // PGRST116 is the code for no rows found
+    console.error("Error fetching existing vote in VoteBox:", fetchError);
     return;
-  } else {
-    const { data, error } = await supabase.from("VoteBox").insert({
-      song_id,
-      image,
-      title,
-      artist,
-    });
+  }
 
-    if (error) {
-      console.error("Error adding song to VoteBox:", error);
-    }
+  // If the song already exists, no need to insert again
+  if (existingVote) {
+    console.log("Song already exists in VoteBox");
+    return;
+  }
+
+  // Insert the new song into VoteBox
+  const { data, error } = await supabase.from("VoteBox").insert({
+    song_id,
+    image,
+    title,
+    artist,
+  });
+
+  if (error) {
+    console.error("Error adding song to VoteBox:", error);
   }
 };
