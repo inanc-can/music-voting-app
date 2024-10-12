@@ -8,14 +8,14 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 export async function POST(req: NextRequest) {
   try {
     const { user_id, song_id, image, title, artist } = await req.json();
-    addVote(user_id, song_id);
+    await addVote(user_id, song_id);
   } catch (error) {
     console.error("Error adding song to VoteBox:", error);
     return NextResponse.json({ error: "Failed to add vote" }, { status: 500 });
   }
   try {
     const { user_id, song_id, image, title, artist } = await req.json();
-    addVoteBox(user_id, song_id, image, title, artist);
+    await addVoteBox(song_id, image, title, artist);
   } catch (error) {
     console.error("Error adding song to VoteBox:", error);
     return NextResponse.json(
@@ -64,7 +64,6 @@ const addVote = async (song_id: string, user_id: string) => {
 };
 
 const addVoteBox = async (
-  user_id: string,
   song_id: string,
   image: string,
   title: string,
