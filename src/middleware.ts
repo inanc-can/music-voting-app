@@ -32,13 +32,19 @@ export async function middleware(req: NextRequest) {
     url.pathname = `/visitor${req.nextUrl.pathname}`;
     return NextResponse.rewrite(url);
   } else {
-    // Redirect authorized users to the user path
-    const url = req.nextUrl.clone();
-    url.pathname = `/user${req.nextUrl.pathname}`;
-    return NextResponse.rewrite(url);
-  }
+    const user = session.user;
+    const isAnonymous = user?.app_metadata?.provider === "anonymous";
 
-  return res;
+    if (isAnonymous) {
+      // Allow anonymous users to stay on the current path
+      return NextResponse.next();
+    } else {
+      // Redirect authorized (non-anonymous) users to the user path
+      const url = req.nextUrl.clone();
+      url.pathname = `/user${req.nextUrl.pathname}`;
+      return NextResponse.rewrite(url);
+    }
+  }
 }
 
 export const config = {
