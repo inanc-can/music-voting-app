@@ -39,7 +39,7 @@ export default function Search({
   return (
     <div className="relative min-h-screen">
       <div className="mx-8 my-4">
-        <SearchBar placeholder="Search a song" />
+        <SearchBar placeholder="Search" />
         <VoteTable query={query} currentPage={currentPage} />
       </div>
       <SignInButton />
