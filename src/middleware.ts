@@ -26,25 +26,19 @@ export async function middleware(req: NextRequest) {
     return res;
   }
 
-  if (!session) {
+  if (!session || session.user.is_anonymous) {
     // Redirect unauthorized users to the visitor path
     const url = req.nextUrl.clone();
     url.pathname = `/visitor${req.nextUrl.pathname}`;
     return NextResponse.rewrite(url);
   } else {
-    const user = session.user;
-    const isAnonymous = user?.app_metadata?.provider === "anonymous";
-
-    if (isAnonymous) {
-      // Allow anonymous users to stay on the current path
-      return NextResponse.next();
-    } else {
-      // Redirect authorized (non-anonymous) users to the user path
-      const url = req.nextUrl.clone();
-      url.pathname = `/user${req.nextUrl.pathname}`;
-      return NextResponse.rewrite(url);
-    }
+    // Redirect authorized users to the user path
+    const url = req.nextUrl.clone();
+    url.pathname = `/user${req.nextUrl.pathname}`;
+    return NextResponse.rewrite(url);
   }
+
+  return res;
 }
 
 export const config = {
