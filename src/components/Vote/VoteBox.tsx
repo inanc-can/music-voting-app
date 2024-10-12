@@ -84,8 +84,30 @@ export function VoteBox(props: VoteBoxProps) {
   async function handleSearchClick() {
     setLoading(true);
     try {
-      newSongClick(props.song_id, props.image, props.songName, props.artist);
-      await props.onVote(props.song_id);
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error("User not authenticated");
+      }
+
+      const response = await fetch("/api/supabase/vote", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_id: user.id,
+          song_id: props.song_id,
+          image: props.image,
+          title: props.songName,
+          artist: props.artist,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to add vote");
+      }
     } catch (error) {
       console.error("Error adding vote:", error);
     } finally {
