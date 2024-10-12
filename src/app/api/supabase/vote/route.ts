@@ -69,14 +69,25 @@ const addVoteBox = async (
   title: string,
   artist: string
 ) => {
-  const { data, error } = await supabase.from("VoteBox").insert({
-    song_id,
-    image,
-    title,
-    artist,
-  });
+  // Check if the user has already voted for this song
+  const { data: existingVote, error: fetchError } = await supabase
+    .from("VoteBox")
+    .select("*")
+    .eq("song_id", song_id)
+    .single();
 
-  if (error) {
-    console.error("Error adding song to VoteBox:", error);
+  if (existingVote !== null) {
+    return;
+  } else {
+    const { data, error } = await supabase.from("VoteBox").insert({
+      song_id,
+      image,
+      title,
+      artist,
+    });
+
+    if (error) {
+      console.error("Error adding song to VoteBox:", error);
+    }
   }
 };
