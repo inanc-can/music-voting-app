@@ -43,7 +43,7 @@ const addVote = async (song_id: string, user_id: string) => {
   // If the user has already voted for the same song, do nothing
   if (existingVote && existingVote.song_id === song_id) {
     return NextResponse.json(
-      { error: "User has already voted for this song" },
+      { message: "User has already voted for this song" },
       { status: 200 }
     );
   }
