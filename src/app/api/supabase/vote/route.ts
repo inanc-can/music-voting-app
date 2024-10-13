@@ -63,8 +63,22 @@ const addVoteBox = async (
   title: string,
   artist: string
 ) => {
+  // Check if the song is already in VoteBox
+  const { error: fetchError } = await supabase
+    .from("VoteBox")
+    .select("*")
+    .eq("song_id", song_id)
+    .single();
+
+  // If the song exists, return
+  if (fetchError && fetchError.code !== "PGRST116") {
+    // PGRST116 is the code for no rows found
+    console.error("Error fetching existing song:", fetchError);
+    return;
+  }
+
   // Insert the new song into VoteBox
-  const { data, error } = await supabase.from("VoteBox").insert({
+  const { error } = await supabase.from("VoteBox").insert({
     image,
     title,
     artist,
