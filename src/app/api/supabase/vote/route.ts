@@ -8,23 +8,8 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 export async function POST(req: NextRequest) {
   try {
     const { user_id, song_id, image, title, artist } = await req.json();
-    const voteResult = await addVote(song_id, user_id);
-    if (!voteResult.success) {
-      return NextResponse.json({ error: voteResult.message }, { status: 500 });
-    }
-
-    const voteBoxResult = await addVoteBox(song_id, image, title, artist);
-    if (!voteBoxResult.success) {
-      return NextResponse.json(
-        { error: voteBoxResult.message },
-        { status: 500 }
-      );
-    }
-
-    return NextResponse.json(
-      { message: "Vote and VoteBox updated successfully" },
-      { status: 200 }
-    );
+    await addVote(song_id, user_id);
+    await addVoteBox(song_id, image, title, artist);
   } catch (error) {
     console.error("Error processing request:", error);
     return NextResponse.json(
@@ -40,13 +25,12 @@ const addVote = async (song_id: string, user_id: string) => {
     .from("votesSongs")
     .select("*")
     .eq("user_id", user_id)
-    .eq("song_id", song_id)
     .single();
 
   if (fetchError && fetchError.code !== "PGRST116") {
     // PGRST116 is the code for no rows found
     console.error("Error fetching existing vote:", fetchError);
-    return { success: false, message: "Error fetching existing vote" };
+    return;
   }
 
   // If a vote exists, delete the previous vote
@@ -54,27 +38,23 @@ const addVote = async (song_id: string, user_id: string) => {
     const { error: deleteError } = await supabase
       .from("votesSongs")
       .delete()
-      .eq("user_id", user_id)
-      .eq("song_id", song_id);
+      .eq("user_id", user_id);
 
     if (deleteError) {
       console.error("Error deleting existing vote:", deleteError);
-      return { success: false, message: "Error deleting existing vote" };
+      return;
     }
   }
 
   // Insert the new vote
-  const { error: insertError } = await supabase.from("votesSongs").insert({
-    user_id,
+  const { data, error } = await supabase.from("votesSongs").insert({
     song_id,
+    user_id,
   });
 
-  if (insertError) {
-    console.error("Error adding vote:", insertError);
-    return { success: false, message: "Error adding vote" };
+  if (error) {
+    console.error("Error adding vote:", error);
   }
-
-  return { success: true, message: "Vote added successfully" };
 };
 
 const addVoteBox = async (
@@ -84,31 +64,27 @@ const addVoteBox = async (
   artist: string
 ) => {
   // Check if the song is already in VoteBox
-  const { error: fetchError } = await supabase
+  const { data: existingSong, error: fetchError } = await supabase
     .from("VoteBox")
     .select("*")
     .eq("song_id", song_id)
     .single();
 
-  // If the song exists, return
   if (fetchError && fetchError.code !== "PGRST116") {
     // PGRST116 is the code for no rows found
     console.error("Error fetching existing song:", fetchError);
-    return { success: false, message: "Error fetching existing song" };
+    return;
   }
 
   // Insert the new song into VoteBox
-  const { error: insertError } = await supabase.from("VoteBox").insert({
+  const { error } = await supabase.from("VoteBox").insert({
     image,
     title,
     artist,
     song_id,
   });
 
-  if (insertError) {
-    console.error("Error adding song to VoteBox:", insertError);
-    return { success: false, message: "Error adding song to VoteBox" };
+  if (error) {
+    console.error("Error adding song to VoteBox:", error);
   }
-
-  return { success: true, message: "Song added to VoteBox" };
 };
