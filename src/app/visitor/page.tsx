@@ -19,17 +19,25 @@ export default function Search({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const signInAnonymously = async () => {
-      const { error } = await supabase.auth.signInAnonymously();
-      if (error) {
-        console.error("Error during anonymous sign-in:", error.message);
+    const checkAndSignInAnonymously = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) {
+        const { error } = await supabase.auth.signInAnonymously();
+        if (error) {
+          console.error("Error during anonymous sign-in:", error.message);
+        } else {
+          console.log("User signed in anonymously");
+        }
       } else {
-        console.log("User signed in anonymously");
+        console.log("User already authenticated");
       }
       setLoading(false);
     };
 
-    signInAnonymously();
+    checkAndSignInAnonymously();
   }, []);
 
   if (loading) {
