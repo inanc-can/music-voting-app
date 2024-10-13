@@ -30,7 +30,10 @@ const addVote = async (song_id: string, user_id: string) => {
   if (fetchError && fetchError.code !== "PGRST116") {
     // PGRST116 is the code for no rows found
     console.error("Error fetching existing vote:", fetchError);
-    return;
+    return NextResponse.json(
+      { error: "Failed to fetch existing vote" },
+      { status: 500 }
+    );
   }
 
   // If a vote exists, delete the previous vote
@@ -42,7 +45,10 @@ const addVote = async (song_id: string, user_id: string) => {
 
     if (deleteError) {
       console.error("Error deleting existing vote:", deleteError);
-      return;
+      return NextResponse.json(
+        { error: "Failed to delete existing vote" },
+        { status: 500 }
+      );
     }
   }
 
@@ -53,7 +59,10 @@ const addVote = async (song_id: string, user_id: string) => {
   });
 
   if (error) {
-    console.error("Error adding vote:", error);
+    return NextResponse.json(
+      { error: "Failed to insert new vote" },
+      { status: 500 }
+    );
   }
 };
 
@@ -72,8 +81,18 @@ const addVoteBox = async (
 
   if (fetchError && fetchError.code !== "PGRST116") {
     // PGRST116 is the code for no rows found
-    console.error("Error fetching existing song:", fetchError);
-    return;
+    return NextResponse.json(
+      { error: "Failed to fetch existing song" },
+      { status: 500 }
+    );
+  }
+
+  // If the song exists, return
+  if (existingSong) {
+    return NextResponse.json(
+      { error: "Song already exists in VoteBox" },
+      { status: 400 }
+    );
   }
 
   // Insert the new song into VoteBox
@@ -85,6 +104,9 @@ const addVoteBox = async (
   });
 
   if (error) {
-    console.error("Error adding song to VoteBox:", error);
+    return NextResponse.json(
+      { error: "Failed to insert new song into VoteBox" },
+      { status: 500 }
+    );
   }
 };
