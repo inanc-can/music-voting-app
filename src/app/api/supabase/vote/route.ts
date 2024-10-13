@@ -11,8 +11,7 @@ export async function POST(req: NextRequest) {
     const voteResult = await addVote(song_id, user_id);
     const voteBoxResult = await addVoteBox(song_id, image, title, artist);
 
-    // Combine the results and return them in the response
-    return NextResponse.json({ message: voteResult }, { status: 200 });
+    return voteResult;
   } catch (error) {
     console.error("Error processing request:", error);
     return NextResponse.json(
@@ -22,7 +21,6 @@ export async function POST(req: NextRequest) {
   }
 
   // Ensure a response is returned after processing
-  return NextResponse.json({ message: "Vote Added" }, { status: 200 });
 }
 
 const addVote = async (song_id: string, user_id: string) => {
