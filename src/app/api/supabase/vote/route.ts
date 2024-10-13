@@ -9,17 +9,11 @@ export async function POST(req: NextRequest) {
   try {
     const { user_id, song_id, image, title, artist } = await req.json();
     await addVote(song_id, user_id);
-  } catch (error) {
-    console.error("Error adding vote", error);
-    return NextResponse.json({ error: "Failed to add vote" }, { status: 500 });
-  }
-  try {
-    const { user_id, song_id, image, title, artist } = await req.json();
     await addVoteBox(song_id, image, title, artist);
   } catch (error) {
-    console.error("Error adding song to VoteBox:", error);
+    console.error("Error processing request:", error);
     return NextResponse.json(
-      { error: "Failed to add song to VoteBox" },
+      { error: "Failed to process request" },
       { status: 500 }
     );
   }
