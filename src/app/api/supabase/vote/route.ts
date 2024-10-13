@@ -120,4 +120,10 @@ const addVoteBox = async (
       { status: 500 }
     );
   }
+
+  // Ensure a response is returned after successful insertion
+  return NextResponse.json(
+    { message: "Song added to VoteBox successfully" },
+    { status: 200 }
+  );
 };
