@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
 }
 
 const addVote = async (song_id: string, user_id: string) => {
-  // Check if the user has already voted for this song
+  // Check if the user has already voted
   const { data: existingVote, error: fetchError } = await supabase
     .from("votesSongs")
     .select("*")
@@ -36,8 +36,16 @@ const addVote = async (song_id: string, user_id: string) => {
     );
   }
 
-  // If a vote exists, delete the previous vote
-  if (existingVote) {
+  // If the user has already voted for the same song, do nothing
+  if (existingVote && existingVote.song_id === song_id) {
+    return NextResponse.json(
+      { error: "User has already voted for this song" },
+      { status: 400 }
+    );
+  }
+
+  // If the user has voted for a different song, delete the old vote
+  if (existingVote && existingVote.song_id !== song_id) {
     const { error: deleteError } = await supabase
       .from("votesSongs")
       .delete()
@@ -53,17 +61,20 @@ const addVote = async (song_id: string, user_id: string) => {
   }
 
   // Insert the new vote
-  const { data, error } = await supabase.from("votesSongs").insert({
-    song_id,
+  const { error: insertError } = await supabase.from("votesSongs").insert({
     user_id,
+    song_id,
   });
 
-  if (error) {
-    return NextResponse.json(
-      { error: "Failed to insert new vote" },
-      { status: 500 }
-    );
+  if (insertError) {
+    console.error("Error adding vote:", insertError);
+    return NextResponse.json({ error: "Failed to add vote" }, { status: 500 });
   }
+
+  return NextResponse.json(
+    { message: "Vote added successfully" },
+    { status: 200 }
+  );
 };
 
 const addVoteBox = async (
