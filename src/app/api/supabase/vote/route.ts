@@ -8,8 +8,11 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 export async function POST(req: NextRequest) {
   try {
     const { user_id, song_id, image, title, artist } = await req.json();
-    await addVote(song_id, user_id);
-    await addVoteBox(song_id, image, title, artist);
+    const voteResult = await addVote(song_id, user_id);
+    const voteBoxResult = await addVoteBox(song_id, image, title, artist);
+
+    // Combine the results and return them in the response
+    return NextResponse.json({ message: voteResult }, { status: 200 });
   } catch (error) {
     console.error("Error processing request:", error);
     return NextResponse.json(
@@ -19,10 +22,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Ensure a response is returned after processing
-  return NextResponse.json(
-    { message: "Vote and song processing completed" },
-    { status: 200 }
-  );
+  return NextResponse.json({ message: "Vote Added" }, { status: 200 });
 }
 
 const addVote = async (song_id: string, user_id: string) => {
