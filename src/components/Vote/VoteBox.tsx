@@ -110,7 +110,8 @@ export function VoteBox(props: VoteBoxProps) {
         console.log(response);
         toast("Failed to add vote");
       } else {
-        toast("Vote added successfully");
+        const result = await response.json();
+        toast(result.message?.toString() || "Vote added successfully");
       }
     } catch (error) {
       console.error("Error adding vote:", error);
