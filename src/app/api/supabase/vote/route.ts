@@ -17,6 +17,12 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   }
+
+  // Ensure a response is returned after processing
+  return NextResponse.json(
+    { message: "Vote and song processing completed" },
+    { status: 200 }
+  );
 }
 
 const addVote = async (song_id: string, user_id: string) => {
@@ -120,7 +126,6 @@ const addVoteBox = async (
       { status: 500 }
     );
   }
-
   // Ensure a response is returned after successful insertion
   return NextResponse.json(
     { message: "Song added to VoteBox successfully" },
