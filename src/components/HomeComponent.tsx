@@ -15,10 +15,14 @@ export default function HomeComponent() {
     console.log("Party started");
     // Logic to pick a winner song
     const song = await pickWinnerSong();
-    console.log("Winner song:", song);
+
     if (song) {
       const songDuration = await duration(song);
       console.log(songDuration);
+      console.log("Winner song:", song);
+      console.log("Duration:", songDuration);
+      console.log("Duration 2 :", Number(songDuration) * 1000);
+
       try {
         const response = await fetch("/api/spotify/play", {
           method: "POST",
@@ -38,6 +42,7 @@ export default function HomeComponent() {
         console.error("An error occurred while playing the song", error);
       }
 
+      console.log(Number(songDuration) * 1000);
       // Wait for the duration of the song before picking the next one
       setTimeout(polling, Number(songDuration) * 1000);
     }
