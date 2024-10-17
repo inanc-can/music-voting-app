@@ -18,7 +18,7 @@ export default function HomeComponent() {
     console.log("Winner song:", song);
     if (song) {
       const songDuration = await duration(song);
-      console.log(Number(songDuration));
+      console.log(songDuration);
       try {
         const response = await fetch("/api/spotify/play", {
           method: "POST",
