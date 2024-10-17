@@ -18,32 +18,10 @@ export default function HomeComponent() {
 
     if (song) {
       const songDuration = await duration(song);
-      console.log(songDuration);
-      console.log("Winner song:", song);
-      console.log("Duration:", songDuration);
-      console.log("Duration 2 :", Number(songDuration) * 1000);
 
-      try {
-        const response = await fetch("/api/spotify/play", {
-          method: "POST",
-          body: JSON.stringify({ song }),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
+      // Play the song
+      playSong(song);
 
-        if (response.ok) {
-          const data = await response.json();
-          console.log("Song is playing:", data);
-        } else {
-          console.log(response);
-          console.error("Failed to play the song");
-        }
-      } catch (error) {
-        console.error("An error occurred while playing the song", error);
-      }
-
-      console.log(Number(songDuration) * 1000);
       // Wait for the duration of the song before picking the next one
       setTimeout(polling, Number(songDuration));
     }
@@ -73,15 +51,26 @@ export default function HomeComponent() {
       <Table />
 
       <div className="absolute bottom-24 left-0 right-0 flex justify-center">
-        <div></div>
-        <Button
-          variant={"secondary"}
-          onClick={() => {
-            setParty(true);
-          }}
-        >
-          Start the Party
-        </Button>
+        {!party && (
+          <Button
+            variant={"secondary"}
+            onClick={() => {
+              setParty(true);
+            }}
+          >
+            Start the Party
+          </Button>
+        )}
+        {party && (
+          <Button
+            variant={"secondary"}
+            onClick={() => {
+              setParty(false);
+            }}
+          >
+            Stop the Party
+          </Button>
+        )}
       </div>
     </div>
   );
