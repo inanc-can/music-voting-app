@@ -36,6 +36,7 @@ export default function HomeComponent() {
           const data = await response.json();
           console.log("Song is playing:", data);
         } else {
+          console.log(response);
           console.error("Failed to play the song");
         }
       } catch (error) {
@@ -44,7 +45,7 @@ export default function HomeComponent() {
 
       console.log(Number(songDuration) * 1000);
       // Wait for the duration of the song before picking the next one
-      setTimeout(polling, Number(songDuration) * 1000);
+      setTimeout(polling, Number(songDuration));
     }
   }, [pickWinnerSong]);
 
