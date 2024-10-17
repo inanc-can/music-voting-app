@@ -20,7 +20,7 @@ export default function HomeComponent() {
       const songDuration = await duration(song);
       console.log(Number(songDuration));
       try {
-        const response = await fetch("/api/spotify/search", {
+        const response = await fetch("/api/spotify/play", {
           method: "POST",
           body: JSON.stringify({ song }),
           headers: {
@@ -30,14 +30,17 @@ export default function HomeComponent() {
 
         if (response.ok) {
           const data = await response.json();
+          console.log("Song is playing:", data);
         } else {
-          console.error("Failed to play the song ");
+          console.error("Failed to play the song");
         }
       } catch (error) {
-        console.error("An error while playing the song", error);
+        console.error("An error occurred while playing the song", error);
       }
+
+      // Wait for the duration of the song before picking the next one
+      setTimeout(polling, Number(songDuration) * 1000);
     }
-    // Logic to wait for the duration of the song
   }, [pickWinnerSong]);
 
   useEffect(() => {
