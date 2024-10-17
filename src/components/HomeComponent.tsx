@@ -19,7 +19,23 @@ export default function HomeComponent() {
     if (song) {
       const songDuration = await duration(song);
       console.log(Number(songDuration));
-      playSong(song);
+      try {
+        const response = await fetch("/api/spotify/search", {
+          method: "POST",
+          body: JSON.stringify({ song }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+        } else {
+          console.error("Failed to play the song ");
+        }
+      } catch (error) {
+        console.error("An error while playing the song", error);
+      }
     }
     // Logic to wait for the duration of the song
   }, [pickWinnerSong]);
