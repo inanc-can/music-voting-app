@@ -14,7 +14,10 @@ export async function POST(req: NextRequest) {
     const data = await spotifyApi.clientCredentialsGrant();
     spotifyApi.setAccessToken(data.body["access_token"]);
 
-    // Perform the search
+    // Cancel the repeat mode
+    await spotifyApi.setRepeat("off");
+
+    // Perform the play
     const response = await spotifyApi.play(songId);
 
     return NextResponse.json(response);

@@ -55,6 +55,14 @@ const addVote = async (song_id: string, user_id: string) => {
       .delete()
       .eq("user_id", user_id);
 
+    let { data, error } = await supabase.rpc("remove_orphaned_vote_boxes");
+
+    if (error) {
+      console.error("Error calling function:", error);
+    } else {
+      console.log("Function executed successfully:", data);
+    }
+
     if (deleteError) {
       console.error("Error deleting existing vote:", deleteError);
       return NextResponse.json(
