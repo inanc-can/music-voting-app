@@ -9,7 +9,6 @@ export async function POST(req: NextRequest) {
   try {
     const { user_id, song_id, image, title, artist } = await req.json();
     const voteResult = await addVote(song_id, user_id);
-    const voteBoxResult = await addVoteBox(song_id, image, title, artist);
 
     return voteResult;
   } catch (error) {
@@ -55,14 +54,6 @@ const addVote = async (song_id: string, user_id: string) => {
       .delete()
       .eq("user_id", user_id);
 
-    let { data, error } = await supabase.rpc("remove_orphaned_vote_boxes");
-
-    if (error) {
-      console.error("Error calling function:", error);
-    } else {
-      console.log("Function executed successfully:", data);
-    }
-
     if (deleteError) {
       console.error("Error deleting existing vote:", deleteError);
       return NextResponse.json(
@@ -85,56 +76,6 @@ const addVote = async (song_id: string, user_id: string) => {
 
   return NextResponse.json(
     { message: "Vote added successfully" },
-    { status: 200 }
-  );
-};
-
-const addVoteBox = async (
-  song_id: string,
-  image: string,
-  title: string,
-  artist: string
-) => {
-  // Check if the song is already in VoteBox
-  const { data: existingSong, error: fetchError } = await supabase
-    .from("VoteBox")
-    .select("*")
-    .eq("song_id", song_id)
-    .single();
-
-  if (fetchError && fetchError.code !== "PGRST116") {
-    // PGRST116 is the code for no rows found
-    return NextResponse.json(
-      { error: "Failed to fetch existing song" },
-      { status: 500 }
-    );
-  }
-
-  // If the song exists, return
-  if (existingSong) {
-    return NextResponse.json(
-      { error: "Song already exists in VoteBox" },
-      { status: 400 }
-    );
-  }
-
-  // Insert the new song into VoteBox
-  const { error } = await supabase.from("VoteBox").insert({
-    image,
-    title,
-    artist,
-    song_id,
-  });
-
-  if (error) {
-    return NextResponse.json(
-      { error: "Failed to insert new song into VoteBox" },
-      { status: 500 }
-    );
-  }
-  // Ensure a response is returned after successful insertion
-  return NextResponse.json(
-    { message: "Song added to VoteBox successfully" },
     { status: 200 }
   );
 };

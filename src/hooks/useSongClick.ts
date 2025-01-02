@@ -1,7 +1,7 @@
 import { supabase } from "@/lib/supabase";
 import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
-
+import { getSongData } from "@/lib/spotify";
 type VoteBox = {
   song_id: string;
   image: string;
@@ -13,10 +13,39 @@ export const useSongClick = () => {
   const [songClicks, setSongClicks] = useState<VoteBox[]>([]);
 
   const getSongClicks = async (): Promise<VoteBox[]> => {
-    let { data, error } = await supabase.rpc("get_votebox_sorted");
-    if (error) console.error(error);
+    const { data: votes, error } = await supabase
+      .from("votesSongs")
+      .select("song_id");
 
-    return data || [];
+    if (!votes) {
+      console.error("No votes found");
+      return [];
+    }
+
+    const uniqueVotes = Array.from(
+      new Set(votes.map((vote: { song_id: string }) => vote.song_id))
+    ).map((song_id) => ({ song_id }));
+
+    if (error) {
+      console.error("Error fetching votes:", error);
+      return [];
+    }
+
+    const songDataPromises = uniqueVotes.map(
+      async (vote: { song_id: string }) => {
+        const songData = await getSongData(vote.song_id);
+        return {
+          song_id: vote.song_id,
+          image: songData.image,
+          title: songData.title,
+          artist: songData.artist,
+        };
+      }
+    );
+
+    const songData = await Promise.all(songDataPromises);
+    setSongClicks(songData);
+    return songData;
   };
 
   const getTemporaryUserId = () => {
@@ -70,24 +99,6 @@ export const useSongClick = () => {
     }
   };
 
-  const addVotebox = async (
-    song_id: string,
-    image: string,
-    title: string,
-    artist: string
-  ) => {
-    const { data, error } = await supabase.from("VoteBox").insert({
-      song_id,
-      image,
-      title,
-      artist,
-    });
-
-    if (error) {
-      console.error("Error adding song to VoteBox:", error);
-    }
-  };
-
   const newSongClick = async (
     song_id: string,
     image: string,
@@ -95,7 +106,6 @@ export const useSongClick = () => {
     artist: string
   ) => {
     await addVote(song_id, null);
-    await addVotebox(song_id, image, title, artist);
   };
 
   return { songClicks, getSongClicks, newSongClick };

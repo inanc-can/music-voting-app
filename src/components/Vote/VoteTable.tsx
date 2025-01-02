@@ -41,7 +41,19 @@ const VoteTable: React.FC<TableProps> = ({ query, currentPage }) => {
     const fetchResults = async () => {
       if (query === "") {
         const topVotedSongs = await getSongClicks();
-        setResults(topVotedSongs.slice(0, 16));
+        const convertedResults = await Promise.all(
+          topVotedSongs.map(async (track: any) => ({
+            song_id: track.song_id,
+            image: track.image,
+            title: track.title,
+            artist: track.artist,
+            votes: await getSongsVotes(track.song_id),
+          }))
+        );
+        const sortedResults = convertedResults.sort(
+          (a, b) => (b.votes || 0) - (a.votes || 0)
+        );
+        setResults(sortedResults.slice(0, 16));
         return;
       }
       try {
@@ -64,7 +76,11 @@ const VoteTable: React.FC<TableProps> = ({ query, currentPage }) => {
               votes: await getSongsVotes(track.song_id),
             }))
           );
-          setResults(convertedResults.slice(0, 16));
+          const sortedResults = convertedResults.sort(
+            (a, b) => (b.votes || 0) - (a.votes || 0)
+          );
+
+          setResults(sortedResults.slice(0, 16));
         } else {
           console.error("Failed to fetch search results");
         }

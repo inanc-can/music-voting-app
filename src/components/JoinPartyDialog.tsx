@@ -1,9 +1,16 @@
-// components/JoinPartyDialog.tsx
 "use client";
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -13,55 +20,91 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { LogInIcon } from "lucide-react";
-import { Party } from "../../types/party";
+import { supabase } from "@/lib/supabase";
 
 interface JoinPartyDialogProps {
-  onJoinParty: (partyCode: string) => void;
+  onJoinParty: (partyId: number) => void;
 }
 
-export function JoinPartyDialog({ onJoinParty }: JoinPartyDialogProps) {
+export default function JoinPartyDialog({ onJoinParty }: JoinPartyDialogProps) {
   const [open, setOpen] = useState(false);
-  const [partyCode, setPartyCode] = useState("");
+  const [parties, setParties] = useState<{ id: number; name: string }[]>([]);
+  const [selectedParty, setSelectedParty] = useState<number | null>(null);
 
-  const handleJoinParty = (e: React.FormEvent) => {
+  useEffect(() => {
+    const fetchParties = async () => {
+      const { data, error } = await supabase.from("parties").select("id, name");
+      if (error) {
+        console.error("Error fetching parties:", error);
+      } else {
+        setParties(data);
+      }
+    };
+
+    fetchParties();
+  }, []);
+
+  const handleJoinParty = async (e: React.FormEvent) => {
     e.preventDefault();
-    onJoinParty(partyCode);
-    setOpen(false);
-    setPartyCode("");
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user && selectedParty) {
+      const { data, error } = await supabase
+        .from("partyparticipants")
+        .insert({
+          party_id: selectedParty,
+          user_id: user.id,
+        })
+        .single();
+      if (error) {
+        console.error("Error joining party:", error);
+      } else {
+        onJoinParty(selectedParty);
+        setOpen(false);
+        setSelectedParty(null);
+      }
+    }
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button
-          className="w-full h-32 bg-white dark:bg-gray-800 bg-opacity-70 dark:bg-opacity-30 backdrop-blur-md text-gray-800 dark:text-white border border-gray-300 dark:border-white dark:border-opacity-20 hover:bg-opacity-100 dark:hover:bg-opacity-50 transition-all duration-300"
-          size="lg"
-        >
-          <div className="flex flex-col items-center">
-            <LogInIcon className="h-12 w-12 mb-2" />
-            <span>Join Party</span>
-          </div>
-        </Button>
+        <Button>Join Party</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Join a Party</DialogTitle>
           <DialogDescription>
-            Enter the party code to join an existing music voting party.
+            Select a party to join from the list below.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleJoinParty}>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
-              <Input
-                id="party-code"
-                value={partyCode}
-                onChange={(e) => setPartyCode(e.target.value)}
-                className="col-span-4"
-                placeholder="Enter party code"
+              <Label htmlFor="party-select" className="text-right">
+                Party
+              </Label>
+              <Select
+                value={selectedParty !== null ? String(selectedParty) : ""}
+                onValueChange={(value) => setSelectedParty(Number(value))}
                 required
-              />
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Select a party" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>
+                      {parties.map((party) => (
+                        <SelectItem key={party.id} value={String(party.id)}>
+                          {party.name}
+                        </SelectItem>
+                      ))}
+                    </SelectLabel>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <DialogFooter>

@@ -35,20 +35,8 @@ export function Table() {
       )
       .subscribe();
 
-    const voteBoxChannel = supabase
-      .channel("votebox-channel")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "VoteBox" },
-        () => {
-          fetchAndSortSongs();
-        }
-      )
-      .subscribe();
-
     return () => {
       supabase.removeChannel(voteChannel);
-      supabase.removeChannel(voteBoxChannel);
     };
   }, []);
 

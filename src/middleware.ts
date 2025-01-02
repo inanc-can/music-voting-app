@@ -27,15 +27,43 @@ export async function middleware(req: NextRequest) {
   }
 
   if (!session || session.user.is_anonymous) {
-    // Redirect unauthorized users to the visitor path
-    const url = req.nextUrl.clone();
-    url.pathname = `/visitor${req.nextUrl.pathname}`;
-    return NextResponse.rewrite(url);
+    // Check if the anonymous user is already in a party
+    const { data: partyParticipant, error } = await supabase
+      .from("partyparticipants")
+      .select("party_id")
+      .eq("user_id", session?.user?.id)
+      .single();
+
+    if (partyParticipant) {
+      // Redirect anonymous user to the party page
+      const url = req.nextUrl.clone();
+      url.pathname = `/visitor/party/${partyParticipant.party_id}`;
+      return NextResponse.rewrite(url);
+    } else {
+      // Redirect unauthorized users to the visitor path
+      const url = req.nextUrl.clone();
+      url.pathname = `/visitor${req.nextUrl.pathname}`;
+      return NextResponse.rewrite(url);
+    }
   } else {
-    // Redirect authorized users to the user path
-    const url = req.nextUrl.clone();
-    url.pathname = `/user${req.nextUrl.pathname}`;
-    return NextResponse.rewrite(url);
+    // Check if the user is already in a party
+    const { data: partyParticipant, error } = await supabase
+      .from("partyparticipants")
+      .select("party_id")
+      .eq("user_id", session.user.id)
+      .single();
+
+    if (partyParticipant) {
+      // Redirect user to the party page
+      const url = req.nextUrl.clone();
+      url.pathname = `/visitor/party/${partyParticipant.party_id}`;
+      return NextResponse.rewrite(url);
+    } else {
+      // Redirect authorized users to the user path
+      const url = req.nextUrl.clone();
+      url.pathname = `/user${req.nextUrl.pathname}`;
+      return NextResponse.rewrite(url);
+    }
   }
 
   return res;

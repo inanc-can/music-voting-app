@@ -6,6 +6,14 @@ var api: SpotifyApi = {} as SpotifyApi;
 const CLIENT_ID = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID || "";
 const REDIRECT_URI = process.env.NEXT_PUBLIC_SPOTIFY_REDIRECT_URL || "";
 
+type VoteBox = {
+  song_id: string;
+  image: string;
+  title: string;
+  artist: string;
+  votes?: number;
+};
+
 try {
   api = SpotifyApi.withUserAuthorization(CLIENT_ID, REDIRECT_URI, [
     "user-read-playback-state",
@@ -25,6 +33,16 @@ export async function getTrack(id: string) {
   return track;
 }
 
+export async function getSongData(id: string): Promise<VoteBox> {
+  const track = await api.tracks.get(id);
+  return {
+    song_id: track.id,
+    image: track.album.images[0].url,
+    title: track.name,
+    artist: track.artists[0].name,
+  };
+}
+
 export async function playSong(id: string) {
   await api
     .makeRequest("PUT", "me/player/play", {
@@ -32,7 +50,6 @@ export async function playSong(id: string) {
     })
     .then(async () => {
       await supabase.from("votesSongs").delete().eq("song_id", id);
-      await supabase.from("VoteBox").delete().eq("song_id", id);
       console.log("Song has been played");
     })
     .catch((error) => {

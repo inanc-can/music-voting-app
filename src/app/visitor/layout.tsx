@@ -2,7 +2,6 @@
 "use client";
 import { Inter } from "next/font/google";
 const inter = Inter({ subsets: ["latin"] });
-import { useRouter } from "next/navigation";
 import "../globals.css";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Toaster } from "@/components/ui/sonner";
@@ -12,8 +11,6 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const router = useRouter();
-
   return (
     <html lang="en" suppressHydrationWarning>
       <body

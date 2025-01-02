@@ -6,6 +6,7 @@ import { useSongVotes } from "@/hooks/useSongVotes";
 import { duration, playSong } from "@/lib/spotify";
 import { Table } from "@/components/Table";
 import LogoutButton from "./LogOutButton";
+import { CreatePartyDialog } from "./CreatePartyDialog";
 
 export default function HomeComponent() {
   const { pickWinnerSong } = useSongVotes();
@@ -43,7 +44,12 @@ export default function HomeComponent() {
                 BBQ Party
               </h2>
             </div>
-            <LogoutButton />
+            <div className="gap-4 flex items-center">
+              <CreatePartyDialog
+                onCreateParty={(partyDetails) => console.log(partyDetails)}
+              />
+              <LogoutButton />
+            </div>
           </div>
         </div>
       </div>

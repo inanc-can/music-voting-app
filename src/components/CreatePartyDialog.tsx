@@ -14,41 +14,56 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { PlusCircleIcon } from "lucide-react";
-import { PartyDetails } from "../../types/party";
-
+import { supabase } from "@/lib/supabase";
 interface CreatePartyDialogProps {
-  onCreateParty: (partyDetails: PartyDetails) => void;
+  onCreateParty: (partyDetails: { name: string }) => void;
 }
 
-export function CreatePartyDialog({
-  onCreateParty,
-}: {
-  onCreateParty: (partyDetails: { name: string; description: string }) => void;
-}) {
+export function CreatePartyDialog({ onCreateParty }: CreatePartyDialogProps) {
   const [open, setOpen] = useState(false);
   const [partyName, setPartyName] = useState("");
-  const [partyDescription, setPartyDescription] = useState("");
 
-  const handleCreateParty = (e: React.FormEvent) => {
+  const handleCreateParty = async (e: React.FormEvent) => {
     e.preventDefault();
-    onCreateParty({ name: partyName, description: partyDescription });
-    setOpen(false);
-    setPartyName("");
-    setPartyDescription("");
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user) {
+      const { data: partyData, error: partyError } = await supabase
+        .from("parties")
+        .insert({
+          name: partyName,
+          user_id: user.id,
+        })
+        .select("id")
+        .single();
+      if (partyError) {
+        console.error("Error creating party:", partyError);
+      } else {
+        const { data: participantData, error: participantError } =
+          await supabase
+            .from("partyparticipants")
+            .insert({
+              party_id: partyData.id,
+              user_id: user.id,
+            })
+            .single();
+        if (participantError) {
+          console.error("Error adding owner as participant:", participantError);
+        } else {
+          onCreateParty({ name: partyName });
+          setOpen(false);
+          setPartyName("");
+        }
+      }
+    }
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button
-          className="w-full h-32 bg-white dark:bg-gray-800 bg-opacity-70 dark:bg-opacity-30 backdrop-blur-md text-gray-800 dark:text-white border border-gray-300 dark:border-white dark:border-opacity-20 hover:bg-opacity-100 dark:hover:bg-opacity-50 transition-all duration-300"
-          size="lg"
-        >
-          <div className="flex flex-col items-center">
-            <PlusCircleIcon className="h-12 w-12 mb-2" />
-            <span>Create Party</span>
-          </div>
+        <Button>
+          <span>Create Party</span>
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
