@@ -33,14 +33,22 @@ export async function getTrack(id: string) {
   return track;
 }
 
-export async function getSongData(id: string): Promise<VoteBox> {
-  const track = await api.tracks.get(id);
-  return {
-    song_id: track.id,
-    image: track.album.images[0].url,
-    title: track.name,
-    artist: track.artists[0].name,
-  };
+export async function getSongData(id: string) {
+  try {
+    const response = await fetch("/api/spotify/trackData", {
+      method: "POST",
+      body: JSON.stringify({ songId: id }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    if (response.ok) {
+      const data = await response.json();
+      return data;
+    }
+  } catch (error) {
+    console.error("An error occurred while searching", error);
+  }
 }
 
 export async function playSong(id: string) {
