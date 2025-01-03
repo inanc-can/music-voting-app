@@ -5,6 +5,8 @@ import { supabase } from "@/lib/supabase";
 import SearchBar from "@/components/SearchBar";
 import SignInButton from "@/components/SignInButton";
 import VoteTable from "@/components/Vote/VoteTable";
+import LeavePartyButton from "@/components/LeavePartyButton";
+import { useRouter } from "next/navigation";
 
 export default function PartyPage({
   searchParams,
@@ -18,6 +20,14 @@ export default function PartyPage({
   const [party, setParty] = useState<{ id: number; name: string } | null>(null);
   const query = searchParams?.query || "";
   const currentPage = Number(searchParams?.page) || 1;
+  const router = useRouter();
+
+  const handleLeaveParty = () => {
+    console.log("User has left the party");
+    // Handle any additional logic after leaving the party
+    router.push("/");
+    router.refresh();
+  };
 
   useEffect(() => {
     const fetchParty = async () => {
@@ -45,8 +55,9 @@ export default function PartyPage({
         <SearchBar placeholder="Search a song" />
         <VoteTable query={query} currentPage={currentPage} />
       </div>
-      <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2">
+      <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 gap-4">
         <SignInButton />
+        <LeavePartyButton onLeaveParty={handleLeaveParty} />
       </div>
     </div>
   );

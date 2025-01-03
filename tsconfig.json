@@ -13,7 +13,7 @@
     "jsx": "preserve",
     "incremental": true,
     "typeRoots": ["node_modules/@types"],
-    "types": ["phoenix", "spotify-api", "spotify-web-playback-sdk"],
+    "types": ["phoenix", "spotify-api", "spotify-web-playback-sdk", "node"],
     "plugins": [
       {
         "name": "next"
