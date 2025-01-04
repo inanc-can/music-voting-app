@@ -83,10 +83,10 @@ export default function PartyPage({
                 <DrawerHeader>
                   <DrawerTitle>Are you bored?</DrawerTitle>
                   <DrawerDescription>
-                    Let's see what is out there!
+                    Let&apos;s see what is out there!
                   </DrawerDescription>
                 </DrawerHeader>
-                <DrawerFooter className="">
+                <DrawerFooter>
                   <SignInButton />
                   <LeavePartyButton onLeaveParty={handleLeaveParty} />
                 </DrawerFooter>
@@ -98,6 +98,3 @@ export default function PartyPage({
     </div>
   );
 }
-
-//    <SignInButton />
-// <LeavePartyButton onLeaveParty={handleLeaveParty} />
