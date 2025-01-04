@@ -6,7 +6,19 @@ import SearchBar from "@/components/SearchBar";
 import SignInButton from "@/components/SignInButton";
 import VoteTable from "@/components/Vote/VoteTable";
 import LeavePartyButton from "@/components/LeavePartyButton";
+import { ArrowUp } from "lucide-react";
 import { useRouter } from "next/navigation";
+import LoadingComponent from "@/components/LoadingComponent";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 
 export default function PartyPage({
   searchParams,
@@ -21,6 +33,7 @@ export default function PartyPage({
   const query = searchParams?.query || "";
   const currentPage = Number(searchParams?.page) || 1;
   const router = useRouter();
+  const [loading, setLoading] = useState(true);
 
   const handleLeaveParty = () => {
     console.log("User has left the party");
@@ -31,6 +44,7 @@ export default function PartyPage({
 
   useEffect(() => {
     const fetchParty = async () => {
+      setLoading(true);
       const { data, error } = await supabase
         .from("parties")
         .select("id, name")
@@ -41,6 +55,7 @@ export default function PartyPage({
       } else {
         setParty(data);
       }
+      setLoading(false);
     };
 
     fetchParty();
@@ -48,17 +63,41 @@ export default function PartyPage({
 
   return (
     <div className="min-h-screen min-w-screen relative">
-      <h1 className="text-3xl font-bold text-center my-8 text-white">
-        Welcome to {party?.name}
-      </h1>
-      <div className="mx-8 my-4">
-        <SearchBar placeholder="Search a song" />
-        <VoteTable query={query} currentPage={currentPage} />
-      </div>
-      <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 gap-4">
-        <SignInButton />
-        <LeavePartyButton onLeaveParty={handleLeaveParty} />
-      </div>
+      {loading ? (
+        <LoadingComponent />
+      ) : (
+        <>
+          <h1 className="text-3xl font-bold text-center my-8 text-white">
+            Welcome to {party?.name}
+          </h1>
+          <div className="mx-8 my-4">
+            <SearchBar placeholder="Search a song" />
+            <VoteTable query={query} currentPage={currentPage} />
+          </div>
+          <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 gap-4">
+            <Drawer>
+              <DrawerTrigger className="bg-white text-black p-2 rounded-full animate-bounce">
+                <ArrowUp size={24} />
+              </DrawerTrigger>
+              <DrawerContent>
+                <DrawerHeader>
+                  <DrawerTitle>Are you bored?</DrawerTitle>
+                  <DrawerDescription>
+                    Let's see what is out there!
+                  </DrawerDescription>
+                </DrawerHeader>
+                <DrawerFooter className="">
+                  <SignInButton />
+                  <LeavePartyButton onLeaveParty={handleLeaveParty} />
+                </DrawerFooter>
+              </DrawerContent>
+            </Drawer>
+          </div>
+        </>
+      )}
     </div>
   );
 }
+
+//    <SignInButton />
+// <LeavePartyButton onLeaveParty={handleLeaveParty} />

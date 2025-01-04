@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -30,6 +31,7 @@ export default function JoinPartyDialog({ onJoinParty }: JoinPartyDialogProps) {
   const [open, setOpen] = useState(false);
   const [parties, setParties] = useState<{ id: number; name: string }[]>([]);
   const [selectedParty, setSelectedParty] = useState<number | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchParties = async () => {
@@ -41,8 +43,25 @@ export default function JoinPartyDialog({ onJoinParty }: JoinPartyDialogProps) {
       }
     };
 
+    const checkUserParty = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) {
+        const { data: partyParticipant, error } = await supabase
+          .from("partyparticipants")
+          .select("party_id")
+          .eq("user_id", user.id)
+          .single();
+        if (partyParticipant) {
+          router.refresh();
+        }
+      }
+    };
+
     fetchParties();
-  }, []);
+    checkUserParty();
+  }, [router]);
 
   const handleJoinParty = async (e: React.FormEvent) => {
     e.preventDefault();

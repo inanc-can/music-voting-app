@@ -38,7 +38,7 @@ export default function JoinOrSignIn() {
       <h1 className="text-3xl font-bold text-white mb-8">
         Join a Party or Sign In
       </h1>
-      <div className="flex space-x-4">
+      <div className="flex gap-4">
         <Button variant="secondary" onClick={handleSignIn}>
           Sign In
         </Button>
