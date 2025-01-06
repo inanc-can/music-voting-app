@@ -78,6 +78,8 @@ export default function JoinPartyDialog({ onJoinParty }: JoinPartyDialogProps) {
           user_id: user.id,
         })
         .single();
+      console.log(data);
+
       if (error) {
         console.error("Error joining party:", error);
       } else {
