@@ -28,11 +28,6 @@ try {
   }
 }
 
-export async function getTrack(id: string) {
-  const track = await api.tracks.get(id);
-  return track;
-}
-
 export async function getSongData(id: string) {
   try {
     const response = await fetch("/api/spotify/trackData", {

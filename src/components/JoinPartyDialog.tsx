@@ -64,7 +64,9 @@ export default function JoinPartyDialog({ onJoinParty }: JoinPartyDialogProps) {
   }, [router]);
 
   const handleJoinParty = async (e: React.FormEvent) => {
+    console.log("Joining party...");
     e.preventDefault();
+    console.log("Selected party:", selectedParty);
     const {
       data: { user },
     } = await supabase.auth.getUser();
