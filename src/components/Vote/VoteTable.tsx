@@ -101,11 +101,7 @@ const VoteTable: React.FC<TableProps> = ({ query, currentPage }) => {
         }
       )
       .subscribe((status) => {
-        if (status === "SUBSCRIBED") {
-          console.log("Subscribed to votesSongs changes");
-        } else {
-          console.error("Subscription to votesSongs failed", status);
-        }
+        console.log("Channel status:", status);
       });
 
     return () => {

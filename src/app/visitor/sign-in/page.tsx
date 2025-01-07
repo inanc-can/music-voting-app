@@ -1,12 +1,11 @@
 "use client";
-import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Login() {
   const [data, setData] = useState<{
@@ -16,6 +15,20 @@ export default function Login() {
     email: "",
     password: "",
   });
+
+  useEffect(() => {
+    const fetchSession = async () => {
+      const { data: session, error } = await supabase.auth.getSession();
+      if (error) {
+        console.error("Error fetching session:", error.message);
+        return;
+      }
+      if (session) {
+        console.log("Session:", session);
+      }
+    };
+    fetchSession();
+  }, []);
 
   const router = useRouter();
 

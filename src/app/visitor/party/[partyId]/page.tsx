@@ -1,13 +1,12 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useSearchParams, useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import SearchBar from "@/components/SearchBar";
 import SignInButton from "@/components/SignInButton";
 import VoteTable from "@/components/Vote/VoteTable";
 import LeavePartyButton from "@/components/LeavePartyButton";
 import { ArrowUp } from "lucide-react";
-import { useRouter } from "next/navigation";
 import LoadingComponent from "@/components/LoadingComponent";
 import {
   Drawer,
@@ -20,18 +19,13 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 
-export default function PartyPage({
-  searchParams,
-}: {
-  searchParams?: {
-    query?: string;
-    page?: string;
-  };
-}) {
+export default function PartyPage() {
   const { partyId } = useParams();
+  const searchParams = useSearchParams();
+
   const [party, setParty] = useState<{ id: number; name: string } | null>(null);
-  const query = searchParams?.query || "";
-  const currentPage = Number(searchParams?.page) || 1;
+  const query = searchParams.get("query") || "";
+  const currentPage = Number(searchParams.get("page")) || 1;
   const router = useRouter();
   const [loading, setLoading] = useState(true);
 

@@ -2,12 +2,11 @@
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import JoinPartyDialog from "@/components/JoinPartyDialog";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useEffect } from "react";
+import { supabase } from "@/lib/supabase";
 
-export default function JoinOrSignIn() {
+export default function VisitorPage() {
   const router = useRouter();
-  const supabase = createClientComponentClient();
 
   useEffect(() => {
     const fetchSession = async () => {
@@ -16,8 +15,19 @@ export default function JoinOrSignIn() {
         console.error("Error fetching session:", error.message);
         return;
       }
-      if (session) {
-        console.log("Session:", session);
+      if (session.session == null) {
+        console.log("Session is null:", session);
+        const { data: anonSession, error } =
+          await supabase.auth.signInAnonymously();
+        if (error) {
+          console.error("Error signing in anonymously:", error.message);
+          return;
+        }
+        console.log("Anon session:", anonSession);
+        // Handle the null session case here
+      } else {
+        console.log("Session found:", session);
+        // Handle the valid session case here
       }
     };
     fetchSession();
