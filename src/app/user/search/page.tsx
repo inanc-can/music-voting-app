@@ -1,15 +1,30 @@
+"use client";
 import SearchBar from "@/components/SearchBar";
 import VoteTable from "@/components/Vote/VoteTable";
-export default async function Search({
-  searchParams,
-}: {
-  searchParams?: {
-    query?: string;
-    page?: string;
-  };
-}) {
-  const query = searchParams?.query || "";
-  const currentPage = Number(searchParams?.page) || 1;
+import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
+
+export default function Search() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <SearchContent />
+    </Suspense>
+  );
+}
+
+function Loading() {
+  return (
+    <div className="flex justify-center items-center min-h-screen">
+      <div className="loader">Loading...</div>{" "}
+      {/* You can replace this with your preferred loading component */}
+    </div>
+  );
+}
+
+function SearchContent() {
+  const searchParams = useSearchParams();
+  const query = searchParams.get("query") || "";
+  const currentPage = Number(searchParams.get("page")) || 1;
 
   return (
     <div className="min-h-screen min-w-screen relative">
