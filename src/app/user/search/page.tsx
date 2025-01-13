@@ -4,6 +4,7 @@ import VoteTable from "@/components/Vote/VoteTable";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 
+// This function renders the search page and handles the loading state
 export default function Search() {
   return (
     <Suspense fallback={<Loading />}>
@@ -12,6 +13,7 @@ export default function Search() {
   );
 }
 
+// This function renders the loading state
 function Loading() {
   return (
     <div className="flex justify-center items-center min-h-screen">
@@ -21,6 +23,7 @@ function Loading() {
   );
 }
 
+// This function renders the search content and handles the search query
 function SearchContent() {
   const searchParams = useSearchParams();
   const query = searchParams.get("query") || "";

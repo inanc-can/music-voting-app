@@ -5,10 +5,12 @@ import JoinPartyDialog from "@/components/JoinPartyDialog";
 import { useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 
+// This function renders the visitor page
 export default function VisitorPage() {
   const router = useRouter();
 
   useEffect(() => {
+    // This function fetches the session and handles anonymous sign-in if the session is null
     const fetchSession = async () => {
       const { data: session, error } = await supabase.auth.getSession();
       if (error) {
