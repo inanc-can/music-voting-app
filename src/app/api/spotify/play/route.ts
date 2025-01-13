@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import SpotifyWebApi from "spotify-web-api-node";
 
+// Create a new instance of the SpotifyWebApi object
 const spotifyApi = new SpotifyWebApi({
   clientId: process.env.SPOTIFY_CLIENT_ID,
   clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
 });
 
+// Handle POST requests to play a song
 export async function POST(req: NextRequest) {
   const { songId } = await req.json();
 

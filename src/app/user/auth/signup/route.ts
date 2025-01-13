@@ -2,6 +2,7 @@ import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
+// Handle POST requests to sign up a new user
 export async function POST(req: NextRequest) {
   const url = new URL(req.url);
   const cookieStore = cookies();
@@ -10,6 +11,7 @@ export async function POST(req: NextRequest) {
   const email = String(formData.get("email"));
   const password = String(formData.get("password"));
 
+  // Create a new instance of the Supabase client
   const supabase = createRouteHandlerClient({
     cookies: () => cookieStore,
   });

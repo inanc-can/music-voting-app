@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
 
+// This function renders the user authentication form
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const router = useRouter();
@@ -32,6 +33,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     password: "",
   });
 
+  // This function handles the login process
   const login = async () => {
     try {
       let { data: dataUser, error } = await supabase.auth.signInWithPassword({
