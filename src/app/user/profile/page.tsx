@@ -1,6 +1,7 @@
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 
+// This function renders the user's profile page
 export default function Profile() {
   return (
     <div className="space-y-6 text-gray-800 dark:text-white">

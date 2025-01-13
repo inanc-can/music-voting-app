@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+// This function renders the login form and handles user login
 export default function Login() {
   const [data, setData] = useState<{
     email: string;
@@ -32,6 +33,7 @@ export default function Login() {
 
   const router = useRouter();
 
+  // This function handles the login process
   const login = async () => {
     try {
       let { data: dataUser, error } = await supabase.auth.signInWithPassword({

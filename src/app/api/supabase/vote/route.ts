@@ -1,10 +1,12 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 
+// Create a new instance of the Supabase client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+// Handle POST requests to add a vote for a song
 export async function POST(req: NextRequest) {
   try {
     const { user_id, song_id, image, title, artist } = await req.json();
@@ -22,6 +24,7 @@ export async function POST(req: NextRequest) {
   // Ensure a response is returned after processing
 }
 
+// Function to add a vote for a song
 const addVote = async (song_id: string, user_id: string) => {
   // Check if the user has already voted
   const { data: existingVote, error: fetchError } = await supabase

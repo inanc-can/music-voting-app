@@ -2,8 +2,11 @@
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 
+// This function renders the settings page
 export default function Settings() {
   const router = useRouter();
+
+  // This function handles the logout process
   const handleLogout = async () => {
     const response = await fetch("/auth/logout", {
       method: "POST",

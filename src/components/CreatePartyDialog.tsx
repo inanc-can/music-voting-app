@@ -1,4 +1,3 @@
-// components/CreatePartyDialog.tsx
 "use client";
 
 import { useState } from "react";
@@ -19,10 +18,12 @@ interface CreatePartyDialogProps {
   onCreateParty: (partyDetails: { name: string }) => void;
 }
 
+// This function renders the dialog for creating a new party
 export function CreatePartyDialog({ onCreateParty }: CreatePartyDialogProps) {
   const [open, setOpen] = useState(false);
   const [partyName, setPartyName] = useState("");
 
+  // This function handles the creation of a new party
   const handleCreateParty = async (e: React.FormEvent) => {
     e.preventDefault();
     const {
