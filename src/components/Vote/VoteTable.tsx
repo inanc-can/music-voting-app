@@ -16,6 +16,7 @@ type VoteBox = {
 type TableProps = {
   query: string;
   currentPage: number;
+  partyId: string;
 };
 
 async function getSongsVotes(song_id: string) {
@@ -33,7 +34,7 @@ async function getSongsVotes(song_id: string) {
   }
 }
 
-const VoteTable: React.FC<TableProps> = ({ query, currentPage }) => {
+const VoteTable: React.FC<TableProps> = ({ query, currentPage, partyId }) => {
   const [results, setResults] = useState<VoteBox[]>([]);
   const { getSongClicks } = useSongClick(); // Add this line
 
@@ -124,6 +125,7 @@ const VoteTable: React.FC<TableProps> = ({ query, currentPage }) => {
             songName={track.title}
             song_id={track.song_id}
             votes={track.votes}
+            partyId={partyId}
             onVote={() => {}} // Pass an empty function to satisfy the prop requirement
           />
         </Suspense>

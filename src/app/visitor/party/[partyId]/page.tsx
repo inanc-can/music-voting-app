@@ -20,9 +20,8 @@ import {
 } from "@/components/ui/drawer";
 
 export default function PartyPage() {
-  const { partyId } = useParams();
+  const { partyId } = useParams() as { partyId: string };
   const searchParams = useSearchParams();
-
   const [party, setParty] = useState<{ id: number; name: string } | null>(null);
   const query = searchParams.get("query") || "";
   const currentPage = Number(searchParams.get("page")) || 1;
@@ -66,7 +65,11 @@ export default function PartyPage() {
           </h1>
           <div className="mx-8 my-4">
             <SearchBar placeholder="Search a song" />
-            <VoteTable query={query} currentPage={currentPage} />
+            <VoteTable
+              query={query}
+              currentPage={currentPage}
+              partyId={partyId}
+            />
           </div>
           <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 gap-4">
             <Drawer>

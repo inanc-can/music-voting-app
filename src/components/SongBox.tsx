@@ -6,6 +6,8 @@ import { playSong } from "@/lib/spotify";
 import { addQueue } from "@/lib/spotify";
 import { Badge } from "./ui/badge";
 import Image from "next/image";
+import { toast } from "sonner";
+
 interface SongBoxProps {
   song_id: string;
   image: string;
@@ -16,34 +18,23 @@ interface SongBoxProps {
 
 export function SongBox(props: SongBoxProps) {
   const [songsVotes, setSongsVotes] = useState(0);
-  const [message, setMessage] = useState("");
-  const [showMessage, setShowMessage] = useState(false);
-  const [messageOpacity, setMessageOpacity] = useState(0);
 
-  const handleClick = (event: { clientX: any; currentTarget: any }) => {
+  const handleClick = async (event: { clientX: any; currentTarget: any }) => {
     const { clientX, currentTarget } = event;
     const { left, width } = currentTarget.getBoundingClientRect();
     const clickPosition = clientX - left;
 
-    if (clickPosition < width / 2) {
-      playSong(props.song_id);
-      setMessage("Song is Played");
-
-      // Perform action for left half click
-    } else {
-      addQueue(props.song_id);
-      setMessage("Added to Queue");
-
-      // Perform action for right half click
+    try {
+      if (clickPosition < width / 2) {
+        await playSong(props.song_id);
+      } else {
+        await addQueue(props.song_id);
+      }
+    } catch (error) {
+      console.error("Operation failed:", error);
     }
-    setShowMessage(true);
-    setMessageOpacity(1);
-
-    setTimeout(() => {
-      setMessageOpacity(0);
-      setTimeout(() => setShowMessage(false), 1000); // Hide message after fade out
-    }, 1000); // Fade out after 1 second
   };
+
   async function getSongsVotes(song_id: string) {
     try {
       const { data, error } = await supabase
@@ -96,7 +87,7 @@ export function SongBox(props: SongBoxProps) {
     >
       <div className="w-48 h-48 relative p-8 hover:cursor-pointer">
         <div className="absolute top-2 right-2 rounded-full text-md px-2 py-1 font-semibold">
-          {props.votes}
+          {songsVotes}
         </div>
         <Image
           src={props.image}
@@ -109,16 +100,6 @@ export function SongBox(props: SongBoxProps) {
           <p className="text-sm font-semibold">{props.songName}</p>
           <p className="text-xs">{props.artist}</p>
         </div>
-        {showMessage && (
-          <div
-            className="absolute top-1/2 transform transition-opacity duration-1000"
-            style={{ opacity: messageOpacity }}
-          >
-            <Badge variant="secondary" className="py-2 px-6 ">
-              {message}
-            </Badge>
-          </div>
-        )}
       </div>
     </div>
   );

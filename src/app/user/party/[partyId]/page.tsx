@@ -1,7 +1,7 @@
 "use client";
 import SearchBar from "@/components/SearchBar";
 import VoteTable from "@/components/Vote/VoteTable";
-import { useSearchParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 
 export default function Search() {
@@ -25,12 +25,13 @@ function SearchContent() {
   const searchParams = useSearchParams();
   const query = searchParams.get("query") || "";
   const currentPage = Number(searchParams.get("page")) || 1;
+  const partyId = useParams().partyId as string;
 
   return (
     <div className="min-h-screen min-w-screen relative">
       <div className="mx-8 my-4">
         <SearchBar placeholder="Search a song" />
-        <VoteTable query={query} currentPage={currentPage} />
+        <VoteTable query={query} currentPage={currentPage} partyId={partyId} />
       </div>
     </div>
   );

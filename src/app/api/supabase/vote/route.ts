@@ -7,8 +7,8 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 export async function POST(req: NextRequest) {
   try {
-    const { user_id, song_id, image, title, artist } = await req.json();
-    const voteResult = await addVote(song_id, user_id);
+    const { user_id, song_id, partyId } = await req.json();
+    const voteResult = await addVote(song_id, user_id, partyId);
 
     return voteResult;
   } catch (error) {
@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
   // Ensure a response is returned after processing
 }
 
-const addVote = async (song_id: string, user_id: string) => {
+const addVote = async (song_id: string, user_id: string, partyId: string) => {
   // Check if the user has already voted
   const { data: existingVote, error: fetchError } = await supabase
     .from("votesSongs")
@@ -67,6 +67,7 @@ const addVote = async (song_id: string, user_id: string) => {
   const { error: insertError } = await supabase.from("votesSongs").insert({
     user_id,
     song_id,
+    partyId: Number(partyId),
   });
 
   if (insertError) {

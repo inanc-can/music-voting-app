@@ -1,18 +1,10 @@
-import { PlaybackState, SpotifyApi, Track } from "@spotify/web-api-ts-sdk";
+import { SpotifyApi, Track } from "@spotify/web-api-ts-sdk";
 import { supabase } from "./supabase";
-
+import { toast } from "sonner";
 var api: SpotifyApi = {} as SpotifyApi;
 
 const CLIENT_ID = process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID || "";
 const REDIRECT_URI = process.env.NEXT_PUBLIC_SPOTIFY_REDIRECT_URL || "";
-
-type VoteBox = {
-  song_id: string;
-  image: string;
-  title: string;
-  artist: string;
-  votes?: number;
-};
 
 try {
   api = SpotifyApi.withUserAuthorization(CLIENT_ID, REDIRECT_URI, [
@@ -46,26 +38,54 @@ export async function getSongData(id: string) {
   }
 }
 
-export async function playSong(id: string) {
-  await api
-    .makeRequest("PUT", "me/player/play", {
+export async function playSong(id: string): Promise<boolean> {
+  try {
+    await api.makeRequest("PUT", "me/player/play", {
       uris: [`spotify:track:${id}`],
-    })
-    .then(async () => {
-      await supabase.from("votesSongs").delete().eq("song_id", id);
-      console.log("Song has been played");
-    })
-    .catch((error) => {
-      console.error(error);
     });
+
+    // Delete votes only if play was successful
+    await supabase.from("votesSongs").delete().eq("song_id", id);
+    toast.success("Playing song");
+    return true;
+  } catch (error: any) {
+    if (error.status === 404 || error.reason === "NO_ACTIVE_DEVICE") {
+      toast.error(
+        "No active Spotify device found. Please open Spotify and try again."
+      );
+    } else if (error.status === 401) {
+      toast.error("Not authorized. Please login to Spotify again.");
+    } else if (error.status === 403) {
+      toast.error("Premium account required to control playback.");
+    } else {
+      toast.error("Failed to play song. Please try again.");
+    }
+    console.error("PlaySong Error:", error);
+    return false;
+  }
 }
 
-export async function addQueue(id: string) {
-  await api.player
-    .addItemToPlaybackQueue(`spotify:track:${id}`)
-    .catch((error) => {
-      console.error(error);
-    });
+export async function addQueue(id: string): Promise<boolean> {
+  try {
+    await api.player.addItemToPlaybackQueue(`spotify:track:${id}`);
+    toast.success("Added to queue");
+    return true;
+  } catch (error: any) {
+    console.error("AddQueue Error:", error);
+    if (error.status === 404 || error.reason === "NO_ACTIVE_DEVICE") {
+      toast.error(
+        "No active Spotify device found. Please open Spotify and try again."
+      );
+    } else if (error.status === 401) {
+      toast.error("Not authorized. Please login to Spotify again.");
+    } else if (error.status === 403) {
+      toast.error("Premium account required to modify queue.");
+    } else {
+      toast.error(error || "Failed to add to queue. Please try again.");
+    }
+    console.error("AddQueue Error:", error);
+    return false;
+  }
 }
 
 export async function duration(id: string): Promise<number> {
@@ -73,6 +93,7 @@ export async function duration(id: string): Promise<number> {
     let state = (await api.tracks.get(id)).duration_ms;
     return state;
   } catch (error) {
+    toast.error("Failed to get duration");
     console.error(error);
   }
   return 0;

@@ -7,8 +7,6 @@ const spotifyApi = new SpotifyWebApi({
 });
 
 export async function POST(req: NextRequest) {
-  console.log(process.env.SPOTIFY_CLIENT_ID, process.env.SPOTIFY_CLIENT_SECRET);
-
   const { searchTerm } = await req.json();
 
   try {

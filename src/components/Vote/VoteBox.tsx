@@ -10,6 +10,7 @@ interface VoteBoxProps {
   artist: string;
   songName: string;
   song_id: string;
+  partyId: string;
   onVote: (song_id: string) => void;
   votes: number;
 }
@@ -103,6 +104,7 @@ export function VoteBox(props: VoteBoxProps) {
           image: props.image,
           title: props.songName,
           artist: props.artist,
+          partyId: props.partyId,
         }),
       });
 
