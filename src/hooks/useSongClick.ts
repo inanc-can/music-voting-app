@@ -12,7 +12,7 @@ type VoteBox = {
 export const useSongClick = () => {
   const [songClicks, setSongClicks] = useState<VoteBox[]>([]);
 
-  const getSongClicks = async (): Promise<VoteBox[]> => {
+  const getSongClicks = async (partyId: string): Promise<VoteBox[]> => {
     const { data: votes, error } = await supabase
       .from("votesSongs")
       .select("song_id");

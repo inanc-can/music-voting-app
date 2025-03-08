@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { duration, playSong } from "@/lib/spotify";
 import { CreatePartyDialog } from "@/components/CreatePartyDialog";
@@ -11,10 +11,15 @@ import DeletePartyDialog from "@/components/DeletePartyDialog";
 import LoadingComponent from "@/components/LoadingComponent";
 import { Switch } from "@/components/ui/switch";
 import SearchBar from "@/components/SearchBar";
-import VoteTable from "@/components/Vote/VoteTable";
-import { useSearchParams } from "next/navigation";
 import Table from "@/components/Table";
 import { pickWinnerSong } from "@/lib/song";
+// Import dynamically
+import dynamic from "next/dynamic";
+
+// Dynamic import with no SSR
+const SearchResults = dynamic(() => import("@/components/SearchResults"), {
+  ssr: false,
+});
 
 export default function HomeComponent() {
   const router = useRouter();
@@ -27,9 +32,6 @@ export default function HomeComponent() {
   const [partyId, setPartyId] = useState("");
   const [loading, setLoading] = useState(true);
   const [showSearchBar, setShowSearchBar] = useState(false);
-  const searchParams = useSearchParams();
-  const query = searchParams.get("query") || "";
-  const currentPage = Number(searchParams.get("page")) || 1;
 
   const polling = useCallback(async () => {
     // Logic to pick a winner song
@@ -44,7 +46,7 @@ export default function HomeComponent() {
       // Wait for the duration of the song before picking the next one
       setTimeout(polling, Number(songDuration));
     }
-  }, [pickWinnerSong]);
+  }, [partyId]);
 
   async function getPartyParticipants(party_id: string) {
     console.log(party_id);
@@ -182,11 +184,9 @@ export default function HomeComponent() {
               {showSearchBar && (
                 <div className="w-4/5 mx-auto">
                   <SearchBar placeholder="Search a Song" />
-                  <VoteTable
-                    query={query}
-                    currentPage={currentPage}
-                    partyId={partyId}
-                  />
+                  <Suspense fallback={<LoadingComponent />}>
+                    <SearchResults partyId={partyId} />
+                  </Suspense>
                 </div>
               )}
               {!showSearchBar && <Table partyId={partyId} />}

@@ -31,7 +31,7 @@ const VoteTable: React.FC<VoteTableProps> = ({
   useEffect(() => {
     const fetchResults = async () => {
       if (query === "") {
-        const topVotedSongs = await getSongClicks();
+        const topVotedSongs = await getSongClicks(partyId);
         const convertedResults = await Promise.all(
           topVotedSongs.map(async (track: any) => ({
             song_id: track.song_id,
