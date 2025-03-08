@@ -1,18 +1,22 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { useSongVotes } from "@/hooks/useSongVotes";
 import { duration, playSong } from "@/lib/spotify";
-import { Table } from "@/components/Table";
 import { CreatePartyDialog } from "@/components/CreatePartyDialog";
 import LogoutButton from "@/components/LogOutButton";
 import { supabase } from "@/lib/supabase";
 import JoinPartyDialog from "@/components/JoinPartyDialog";
 import { useRouter } from "next/navigation";
 import DeletePartyDialog from "@/components/DeletePartyDialog";
+import LoadingComponent from "@/components/LoadingComponent";
+import { Switch } from "@/components/ui/switch";
+import SearchBar from "@/components/SearchBar";
+import VoteTable from "@/components/Vote/VoteTable";
+import { useSearchParams } from "next/navigation";
+import Table from "@/components/Table";
+import { pickWinnerSong } from "@/lib/song";
 
 export default function HomeComponent() {
-  const { pickWinnerSong } = useSongVotes();
   const router = useRouter();
   const [userId, setUserId] = useState("");
   const [hasParty, sethasParty] = useState(false);
@@ -21,10 +25,15 @@ export default function HomeComponent() {
   const [partyName, setPartyName] = useState("");
   const [partyParticipantsCount, setPartyParticipantsCount] = useState(0);
   const [partyId, setPartyId] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [showSearchBar, setShowSearchBar] = useState(false);
+  const searchParams = useSearchParams();
+  const query = searchParams.get("query") || "";
+  const currentPage = Number(searchParams.get("page")) || 1;
+
   const polling = useCallback(async () => {
-    console.log("Party started");
     // Logic to pick a winner song
-    const song = await pickWinnerSong();
+    const song = await pickWinnerSong(partyId);
 
     if (song) {
       const songDuration = await duration(song);
@@ -37,13 +46,28 @@ export default function HomeComponent() {
     }
   }, [pickWinnerSong]);
 
+  async function getPartyParticipants(party_id: string) {
+    console.log(party_id);
+    try {
+      const { data, error } = await supabase
+        .from("partyparticipants")
+        .select("id")
+        .eq("party_id", party_id);
+
+      if (data) {
+        return data.length;
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  }
+
   useEffect(() => {
     const fetchUser = async () => {
       const {
         data: { user },
       } = await supabase.auth.getUser();
       setUserId(user?.id || "");
-      console.log("User ID", user?.id);
       if (!user) {
         return;
       }
@@ -56,96 +80,141 @@ export default function HomeComponent() {
 
       if (data) {
         sethasParty(true);
-        console.log("User in party", data);
         setPartyId(data.id);
         setPartyName(data.name);
-        const { data: partyParticipants, error } = await supabase
-          .from("partyparticipants")
-          .select("party_id")
-          .eq("party_id", data.id);
-        console.log("Party participants", partyParticipants);
-        setPartyParticipantsCount(partyParticipants?.length || 0);
       } else {
         setInParty(false);
       }
     };
     fetchUser();
+    setLoading(false);
   }, []);
 
+  useEffect(() => {
+    getPartyParticipants(partyId).then((participants) =>
+      setPartyParticipantsCount(participants || 0)
+    );
+    const channel = supabase
+      .channel("public:partyparticipants")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "partyparticipants" },
+        (payload) => {
+          getPartyParticipants(partyId).then((participants) =>
+            setPartyParticipantsCount(participants || 0)
+          );
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [partyId]);
+
   return (
-    <div className="space-y-6">
-      <div>
-        <div
-          className="bg-opacity-70 dark:bg-opacity-30 backdrop-blur-md p-6 rounded-lg
-        flex-row space-y-6 md:flex justify-between items-center"
-        >
+    <div>
+      {loading ? (
+        <LoadingComponent />
+      ) : (
+        <div className="space-y-6">
           <div>
-            {hasParty && (
-              <>
-                <p className="font-semibold text-xl text-gray-200">
-                  Welcome to {partyName}
-                </p>
-                <p className="text-gray-300 font-normal">
-                  Participants: {partyParticipantsCount}
-                </p>
-              </>
-            )}
-          </div>
-          <div className="flex space-x-4">
-            {!hasParty && (
-              <CreatePartyDialog
-                onCreateParty={(partyDetails) => {
-                  console.log(partyDetails);
-                  router.refresh();
-                }}
-              />
-            )}
-            {hasParty && (
-              <DeletePartyDialog
-                partyId={partyId}
-                onDeleteParty={() => {
-                  router.refresh();
-                }}
-              />
-            )}
+            <div
+              className="bg-opacity-70 dark:bg-opacity-30 backdrop-blur-md p-6 rounded-lg
+        flex-row space-y-6 md:flex justify-between items-center"
+            >
+              <div>
+                {hasParty && (
+                  <div className="flex flex-row space-x-4">
+                    <div>
+                      <p className="font-semibold text-2xl text-gray-200">
+                        Welcome to {partyName}
+                      </p>
+                      <p className="text-gray-300 font-normal text-xl">
+                        Participants: {partyParticipantsCount}
+                      </p>
+                    </div>
+                    <div className="flex items-center space-x-4">
+                      <Switch
+                        checked={showSearchBar}
+                        onCheckedChange={(checked) => setShowSearchBar(checked)}
+                      />
+                      <span className="text-gray-300 text-sm">
+                        Show Search Bar
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div className="flex space-x-4">
+                {!hasParty && (
+                  <CreatePartyDialog
+                    onCreateParty={(partyDetails) => {
+                      console.log(partyDetails);
+                      router.refresh();
+                    }}
+                  />
+                )}
+                {hasParty && (
+                  <DeletePartyDialog
+                    partyId={partyId}
+                    onDeleteParty={() => {
+                      router.refresh();
+                    }}
+                  />
+                )}
 
-            <JoinPartyDialog
-              onJoinParty={(partyId) => {
-                console.log(partyId);
-                router.refresh();
-              }}
-            />
-            <LogoutButton />
+                {!hasParty && (
+                  <JoinPartyDialog
+                    onJoinParty={(partyId) => {
+                      console.log(partyId);
+                      router.refresh();
+                    }}
+                  />
+                )}
+                <LogoutButton />
+              </div>
+            </div>
           </div>
+
+          {hasParty && (
+            <>
+              {showSearchBar && (
+                <div className="w-4/5 mx-auto">
+                  <SearchBar placeholder="Search a Song" />
+                  <VoteTable
+                    query={query}
+                    currentPage={currentPage}
+                    partyId={partyId}
+                  />
+                </div>
+              )}
+              {!showSearchBar && <Table partyId={partyId} />}
+              <div className="absolute bottom-24 left-0 right-0 flex justify-center">
+                {!playing && (
+                  <Button
+                    variant={"secondary"}
+                    onClick={() => {
+                      setPlaying(true);
+                    }}
+                  >
+                    Start the Party
+                  </Button>
+                )}
+                {playing && (
+                  <Button
+                    variant={"secondary"}
+                    onClick={() => {
+                      setPlaying(false);
+                    }}
+                  >
+                    Stop the Party
+                  </Button>
+                )}
+              </div>
+            </>
+          )}
         </div>
-      </div>
-
-      {hasParty && (
-        <>
-          <Table />
-          <div className="absolute bottom-24 left-0 right-0 flex justify-center">
-            {!playing && (
-              <Button
-                variant={"secondary"}
-                onClick={() => {
-                  setPlaying(true);
-                }}
-              >
-                Start the Party
-              </Button>
-            )}
-            {playing && (
-              <Button
-                variant={"secondary"}
-                onClick={() => {
-                  setPlaying(false);
-                }}
-              >
-                Stop the Party
-              </Button>
-            )}
-          </div>
-        </>
       )}
     </div>
   );

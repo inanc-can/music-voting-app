@@ -97,8 +97,8 @@ export function SongBox(props: SongBoxProps) {
           className="w-full h-full object-cover rounded-lg group-hover:scale-105 transition-transform duration-300"
         />
         <div className="mt-4 text-center">
-          <p className="text-sm font-semibold">{props.songName}</p>
-          <p className="text-xs">{props.artist}</p>
+          <p className="text-base font-semibold">{props.songName}</p>
+          <p className="text-sm">{props.artist}</p>
         </div>
       </div>
     </div>

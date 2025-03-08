@@ -4,6 +4,7 @@ const VoteBox = React.lazy(() => import("./VoteBox")); // Dynamically import Vot
 import { supabase } from "@/lib/supabase";
 import { useSongClick } from "@/hooks/useSongClick"; // Add this import
 import { VoteBoxSkeleton } from "../skeletons/VoteBoxSkeleton";
+import { getSongsVotes } from "@/lib/song";
 
 type VoteBox = {
   song_id: string;
@@ -13,28 +14,17 @@ type VoteBox = {
   votes?: number;
 };
 
-type TableProps = {
+type VoteTableProps = {
   query: string;
   currentPage: number;
   partyId: string;
 };
 
-async function getSongsVotes(song_id: string) {
-  try {
-    const { data, error } = await supabase
-      .from("votesSongs")
-      .select("song_id")
-      .eq("song_id", song_id);
-
-    if (data) {
-      return data.length;
-    }
-  } catch (error) {
-    console.error("Error fetching data:", error);
-  }
-}
-
-const VoteTable: React.FC<TableProps> = ({ query, currentPage, partyId }) => {
+const VoteTable: React.FC<VoteTableProps> = ({
+  query,
+  currentPage,
+  partyId,
+}) => {
   const [results, setResults] = useState<VoteBox[]>([]);
   const { getSongClicks } = useSongClick(); // Add this line
 
@@ -48,7 +38,7 @@ const VoteTable: React.FC<TableProps> = ({ query, currentPage, partyId }) => {
             image: track.image,
             title: track.title,
             artist: track.artist,
-            votes: await getSongsVotes(track.song_id),
+            votes: await getSongsVotes(track.song_id, partyId),
           }))
         );
         const sortedResults = convertedResults.sort(
@@ -74,7 +64,7 @@ const VoteTable: React.FC<TableProps> = ({ query, currentPage, partyId }) => {
               image: track.image,
               title: track.title,
               artist: track.artist,
-              votes: await getSongsVotes(track.song_id),
+              votes: await getSongsVotes(track.song_id, partyId),
             }))
           );
           const sortedResults = convertedResults.sort(

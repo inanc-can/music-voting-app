@@ -9,6 +9,10 @@ export async function middleware(req: NextRequest) {
     error,
   } = await supabase.auth.getSession();
 
+  if (error) {
+    console.error("Error fetching session:", error);
+  }
+
   // Allow access to the sign-in and sign-up pages for visitors
   if (
     req.nextUrl.pathname.startsWith("/visitor/sign-in") ||
@@ -31,7 +35,7 @@ export async function middleware(req: NextRequest) {
       .from("partyparticipants")
       .select("party_id")
       .eq("user_id", session?.user?.id)
-      .single();
+      .maybeSingle();
 
     if (partyParticipant) {
       // Redirect anonymous user to the party page
@@ -50,7 +54,7 @@ export async function middleware(req: NextRequest) {
       .from("partyparticipants")
       .select("party_id")
       .eq("user_id", session.user.id)
-      .single();
+      .maybeSingle();
 
     if (partyParticipant) {
       // Redirect user to the party page
