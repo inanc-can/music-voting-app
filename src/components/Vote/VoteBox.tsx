@@ -1,9 +1,9 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { useSongClick } from "@/hooks/useSongClick";
 import Image from "next/image";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
+import { getSongsVotes } from "@/lib/song";
 
 interface VoteBoxProps {
   image: string;
@@ -11,31 +11,15 @@ interface VoteBoxProps {
   songName: string;
   song_id: string;
   partyId: string;
-  onVote: (song_id: string) => void;
+  onVote?: (song_id: string) => void;
   votes: number;
 }
 
 export function VoteBox(props: VoteBoxProps) {
-  const { newSongClick } = useSongClick();
   const [songsVotes, setSongsVotes] = useState(props.votes);
   const [loading, setLoading] = useState(false);
   const [animationClass, setAnimationClass] = useState("");
   const [animationBoxClass, setAnimationBoxClass] = useState("");
-
-  async function getSongsVotes(song_id: string) {
-    try {
-      const { data, error } = await supabase
-        .from("votesSongs")
-        .select("song_id")
-        .eq("song_id", song_id);
-
-      if (data) {
-        return data.length;
-      }
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  }
 
   useEffect(() => {
     setAnimationClass("animate-slideIn");
@@ -56,7 +40,7 @@ export function VoteBox(props: VoteBoxProps) {
 
   useEffect(() => {
     const fetchVotes = async () => {
-      const votes = await getSongsVotes(props.song_id);
+      const votes = await getSongsVotes(props.song_id, props.partyId);
       setSongsVotes(votes || 0);
     };
     fetchVotes();
@@ -71,7 +55,7 @@ export function VoteBox(props: VoteBoxProps) {
           table: "votesSongs",
         },
         (payload) => {
-          getSongsVotes(props.song_id).then((votes) =>
+          getSongsVotes(props.song_id, props.partyId).then((votes) =>
             setSongsVotes(votes || 0)
           );
         }

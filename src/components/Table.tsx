@@ -56,6 +56,7 @@ const Table: React.FC<TableProps> = ({ partyId }) => {
             songName={track.title}
             song_id={track.song_id}
             votes={track.votes}
+            partyId={partyId}
           />
         </Suspense>
       ))}

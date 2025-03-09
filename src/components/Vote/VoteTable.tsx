@@ -116,7 +116,6 @@ const VoteTable: React.FC<VoteTableProps> = ({
             song_id={track.song_id}
             votes={track.votes}
             partyId={partyId}
-            onVote={() => {}} // Pass an empty function to satisfy the prop requirement
           />
         </Suspense>
       ))}

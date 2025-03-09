@@ -4,9 +4,8 @@ import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { playSong } from "@/lib/spotify";
 import { addQueue } from "@/lib/spotify";
-import { Badge } from "./ui/badge";
 import Image from "next/image";
-import { toast } from "sonner";
+import { getSongsVotes } from "@/lib/song";
 
 interface SongBoxProps {
   song_id: string;
@@ -14,6 +13,7 @@ interface SongBoxProps {
   artist: string;
   songName: string;
   votes?: number;
+  partyId: string;
 }
 
 export function SongBox(props: SongBoxProps) {
@@ -35,24 +35,9 @@ export function SongBox(props: SongBoxProps) {
     }
   };
 
-  async function getSongsVotes(song_id: string) {
-    try {
-      const { data, error } = await supabase
-        .from("votesSongs")
-        .select("song_id")
-        .eq("song_id", song_id);
-
-      if (data) {
-        return data.length;
-      }
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  }
-
   useEffect(() => {
     const fetchVotes = async () => {
-      const votes = await getSongsVotes(props.song_id);
+      const votes = await getSongsVotes(props.song_id, props.partyId);
       setSongsVotes(votes || 0);
     };
     fetchVotes();
