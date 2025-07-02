@@ -1,60 +1,60 @@
 "use client";
-import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import { useDebouncedCallback } from "use-debounce";
 import { useState } from "react";
-export default function Search({ 
-  placeholder, 
-  onLoadingChange 
-}: { 
+
+interface PartySearchBarProps {
   placeholder: string;
+  onSearchChange: (query: string) => void;
+  initialValue?: string;
   onLoadingChange?: (loading: boolean) => void;
-}) {
-  const searchParams = useSearchParams();
-  const pathname = usePathname();
-  const { replace } = useRouter();
-  const [inputValue, setInputValue] = useState(
-    searchParams.get("query")?.toString() || ""
-  );
-  const handleSearch = useDebouncedCallback((term) => {
-    const params = new URLSearchParams(searchParams);
-    if (term) {
-      params.set("query", term);
-    } else {
-      params.delete("query");
-    }
-    replace(`${pathname}?${params.toString()}`);
+}
+
+export default function PartySearchBar({ 
+  placeholder, 
+  onSearchChange, 
+  initialValue = "",
+  onLoadingChange
+}: PartySearchBarProps) {
+  const [inputValue, setInputValue] = useState(initialValue);
+  
+  const handleSearch = useDebouncedCallback((term: string) => {
+    onSearchChange(term);
   }, 300);
 
   const clearSearch = () => {
     setInputValue("");
-    handleSearch("");
+    onSearchChange("");
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setInputValue(value);
+    
+    // Show loading immediately when user types
+    if (value.length > 0) {
+      onLoadingChange?.(true);
+    }
+    
+    handleSearch(value);
   };
 
   return (
     <div className="relative flex flex-1 flex-shrink-0 ">
-      <label htmlFor="search" className="sr-only">
+      <label htmlFor="party-search" className="sr-only">
         Search
       </label>
       <input
         className="peer bg-white block w-full rounded-md border border-gray-200 py-[12px] pl-10 text-sm outline-2 placeholder:text-gray-500 text-gray-900"
         placeholder={placeholder}
-        onChange={(e) => {
-          const value = e.target.value;
-          setInputValue(value);
-          
-          // Show loading immediately when user types
-          if (value.length > 0) {
-            onLoadingChange?.(true);
-          }
-          
-          handleSearch(value);
-        }}
         value={inputValue}
+        onChange={handleInputChange}
+        id="party-search"
       />
       {inputValue && (
         <button
           onClick={clearSearch}
           className="absolute inset-y-0 right-0 flex items-center pr-3"
+          aria-label="Clear search"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
