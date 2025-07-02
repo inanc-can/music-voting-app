@@ -15,6 +15,7 @@ import Table from "@/components/Table";
 import { pickWinnerSong } from "@/lib/song";
 // Import dynamically
 import dynamic from "next/dynamic";
+import { MenuBar } from "@/components/menu-bar";
 
 // Dynamic import with no SSR
 const SearchResults = dynamic(() => import("@/components/SearchResults"), {
@@ -123,7 +124,7 @@ export default function HomeComponent() {
           <div>
             <div
               className="bg-opacity-70 dark:bg-opacity-30 backdrop-blur-md p-6 rounded-lg
-        flex-row space-y-6 md:flex justify-between items-center"
+              flex-row space-y-6 md:flex justify-between items-center"
             >
               <div>
                 {hasParty && (
@@ -165,6 +166,28 @@ export default function HomeComponent() {
                     }}
                   />
                 )}
+                <div className="">
+                  {!playing && (
+                    <Button
+                      variant={"secondary"}
+                      onClick={() => {
+                        setPlaying(true);
+                      }}
+                    >
+                      Start the Party
+                    </Button>
+                  )}
+                  {playing && (
+                    <Button
+                      variant={"secondary"}
+                      onClick={() => {
+                        setPlaying(false);
+                      }}
+                    >
+                      Stop the Party
+                    </Button>
+                  )}
+                </div>
 
                 {!hasParty && (
                   <JoinPartyDialog
@@ -190,30 +213,9 @@ export default function HomeComponent() {
                 </div>
               )}
               {!showSearchBar && <Table partyId={partyId} />}
-              <div className="absolute bottom-24 left-0 right-0 flex justify-center">
-                {!playing && (
-                  <Button
-                    variant={"secondary"}
-                    onClick={() => {
-                      setPlaying(true);
-                    }}
-                  >
-                    Start the Party
-                  </Button>
-                )}
-                {playing && (
-                  <Button
-                    variant={"secondary"}
-                    onClick={() => {
-                      setPlaying(false);
-                    }}
-                  >
-                    Stop the Party
-                  </Button>
-                )}
-              </div>
             </>
           )}
+          <MenuBar className="" />
         </div>
       )}
     </div>
