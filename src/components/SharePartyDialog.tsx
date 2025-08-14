@@ -1,6 +1,6 @@
-"use client"
-import { useEffect, useState } from "react"
-import { Button } from "@/components/ui/button"
+"use client";
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -9,51 +9,110 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
+import { jsPDF } from "jspdf";
+import QRCode from "qrcode";
 
-export default function SharePartyDialog({ partyId }: { partyId: string }) {
-  const [open, setOpen] = useState(false)
-  const [qr, setQr] = useState<string>("")
-  const [link, setLink] = useState<string>("")
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+export default function SharePartyDialog({
+  partyId,
+  partyName,
+}: {
+  partyId: string;
+  partyName?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const [qr, setQr] = useState<string>("");
+  const [link, setLink] = useState<string>("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchLink = async () => {
-      if (!open) return
-      setLoading(true)
-      setError(null)
+      if (!open) return;
+      setLoading(true);
+      setError(null);
       try {
-        const res = await fetch(`/api/deeplink/generate?partyId=${partyId}`)
+        const res = await fetch(`/api/deeplink/generate?partyId=${partyId}`);
         if (!res.ok) {
-          const data = await res.json().catch(() => ({}))
-          setError(data?.error || "Failed to generate QR")
-          setLoading(false)
-          return
+          const data = await res.json().catch(() => ({}));
+          setError(data?.error || "Failed to generate QR");
+          setLoading(false);
+          return;
         }
-        const data = await res.json()
-        setQr(data.qr)
-        setLink(data.deepLink)
+        const data = await res.json();
+        setQr(data.qr);
+        setLink(data.deepLink);
       } catch (e) {
-        setError("Network error")
+        setError("Network error");
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
-    fetchLink()
-  }, [open, partyId])
+    };
+    fetchLink();
+  }, [open, partyId]);
 
   const handleCopy = async () => {
-    if (!link) return
+    if (!link) return;
     try {
-      await navigator.clipboard.writeText(link)
+      await navigator.clipboard.writeText(link);
     } catch {}
-  }
+  };
+
+  const handleDownloadPdf = async () => {
+    if (!link) return;
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+    });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+
+    const title = partyName || "Party";
+    doc.setFontSize(22);
+    doc.setFont("helvetica", "bold");
+    const textWidth = doc.getTextWidth(title);
+    doc.text(title, (pageWidth - textWidth) / 2, 20);
+
+    const margin = 15;
+    const topAfterTitle = 30;
+    const footerReserve = 14; // space for footer note
+    const maxQrWidth = pageWidth - margin * 2;
+    const maxQrHeight = pageHeight - topAfterTitle - margin - footerReserve;
+    const qrSize = Math.min(maxQrWidth, maxQrHeight);
+    const x = (pageWidth - qrSize) / 2;
+    const y = topAfterTitle + (maxQrHeight - qrSize) / 2;
+
+    // Generate high-resolution QR for crisp print
+    const hiResQrDataUrl = await QRCode.toDataURL(link, {
+      errorCorrectionLevel: "M",
+      margin: 1,
+      width: 2048,
+    });
+    doc.addImage(
+      hiResQrDataUrl,
+      "PNG",
+      x,
+      y,
+      qrSize,
+      qrSize,
+      undefined,
+      "FAST"
+    );
+
+    // Footer note
+    const footerNote = "Scan and Start Voting for the Next Song";
+    doc.setFontSize(24);
+    doc.setFont("helvetica", "normal");
+    const footerWidth = doc.getTextWidth(footerNote);
+    doc.text(footerNote, (pageWidth - footerWidth) / 2, pageHeight - margin);
+    doc.save(`${title.replace(/\s+/g, "-").toLowerCase()}-qr.pdf`);
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant={"secondary"} size="sm">
+        <Button variant={"secondary"}>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
@@ -95,10 +154,21 @@ export default function SharePartyDialog({ partyId }: { partyId: string }) {
             )}
             {link && (
               <div className="space-y-2">
-                <p className="text-xs break-all bg-black/30 p-2 rounded">{link}</p>
-                <Button variant={"secondary"} size="sm" onClick={handleCopy}>
-                  Copy link
-                </Button>
+                <p className="text-xs break-all bg-black/30 p-2 rounded">
+                  {link}
+                </p>
+                <div className="flex gap-2">
+                  <Button variant={"secondary"} size="sm" onClick={handleCopy}>
+                    Copy link
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="default"
+                    onClick={handleDownloadPdf}
+                  >
+                    Download PDF
+                  </Button>
+                </div>
               </div>
             )}
           </div>
@@ -106,5 +176,5 @@ export default function SharePartyDialog({ partyId }: { partyId: string }) {
         <DialogFooter />
       </DialogContent>
     </Dialog>
-  )
-} 
+  );
+}
