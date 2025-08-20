@@ -29,43 +29,47 @@ export async function middleware(req: NextRequest) {
     return res;
   }
 
-  if (!session || session.user.is_anonymous) {
-    // Check if the anonymous user is already in a party
-    const { data: partyParticipant, error } = await supabase
-      .from("partyparticipants")
-      .select("party_id")
-      .eq("user_id", session?.user?.id)
-      .maybeSingle();
+  // Allow authenticated users to access visitor page for joining parties
+  if (req.nextUrl.pathname === "/visitor") {
+    return res;
+  }
 
-    if (partyParticipant) {
-      // Redirect anonymous user to the party page
-      const url = req.nextUrl.clone();
-      url.pathname = `/visitor/party/${partyParticipant.party_id}`;
-      return NextResponse.rewrite(url);
-    } else {
-      // Redirect unauthorized users to the visitor path
+  if (!session) {
+    // No session at all, redirect to visitor
+    const url = req.nextUrl.clone();
+    url.pathname = `/visitor${req.nextUrl.pathname}`;
+    return NextResponse.rewrite(url);
+  }
+
+  // Check if the user is already in a party (both anonymous and authenticated users)
+  const { data: partyParticipant, error: partyError } = await supabase
+    .from("partyparticipants")
+    .select("party_id")
+    .eq("user_id", session.user.id)
+    .maybeSingle();
+
+  if (partyParticipant) {
+    // Redirect user to the party page
+    const url = req.nextUrl.clone();
+    url.pathname = `/visitor/party/${partyParticipant.party_id}`;
+    return NextResponse.rewrite(url);
+  } else {
+    // User is not in a party
+    if (session.user.is_anonymous) {
+      // Anonymous user goes to visitor path
       const url = req.nextUrl.clone();
       url.pathname = `/visitor${req.nextUrl.pathname}`;
       return NextResponse.rewrite(url);
-    }
-  } else {
-    // Check if the user is already in a party
-    const { data: partyParticipant, error } = await supabase
-      .from("partyparticipants")
-      .select("party_id")
-      .eq("user_id", session.user.id)
-      .maybeSingle();
-
-    if (partyParticipant) {
-      // Redirect user to the party page
-      const url = req.nextUrl.clone();
-      url.pathname = `/visitor/party/${partyParticipant.party_id}`;
-      return NextResponse.rewrite(url);
     } else {
-      // Redirect authorized users to the user path
-      const url = req.nextUrl.clone();
-      url.pathname = `/user${req.nextUrl.pathname}`;
-      return NextResponse.rewrite(url);
+      // Authenticated user can access both visitor and user paths
+      // Only redirect to user path for specific routes that should be user-only
+      if (req.nextUrl.pathname === "/" || req.nextUrl.pathname === "/user") {
+        const url = req.nextUrl.clone();
+        url.pathname = `/user${req.nextUrl.pathname}`;
+        return NextResponse.rewrite(url);
+      }
+      // For other paths, allow access (including visitor paths for joining parties)
+      return res;
     }
   }
 

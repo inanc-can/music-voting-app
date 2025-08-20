@@ -6,6 +6,16 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[];
 
+export interface UserMetadata {
+  first_name: string;
+  last_name: string;
+  age?: number;
+  instagram?: string;
+  twitter?: string;
+  tiktok?: string;
+  show_profile: boolean;
+}
+
 export type Database = {
   public: {
     Tables: {
@@ -55,7 +65,6 @@ export type Database = {
         Relationships: [];
       };
       PartyParticipants: {
-        // Add this block
         Row: {
           id: number;
           party_id: number;
@@ -75,6 +84,49 @@ export type Database = {
           joined_at?: string;
         };
         Relationships: [];
+      };
+      profiles: {
+        Row: {
+          id: string;
+          first_name: string;
+          last_name: string;
+          age: number | null;
+          instagram: string | null;
+          twitter: string | null;
+          tiktok: string | null;
+          show_profile: boolean;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          first_name: string;
+          last_name: string;
+          age?: number | null;
+          instagram?: string | null;
+          twitter?: string | null;
+          tiktok?: string | null;
+          show_profile?: boolean;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          first_name?: string;
+          last_name?: string;
+          age?: number | null;
+          instagram?: string | null;
+          twitter?: string | null;
+          tiktok?: string | null;
+          show_profile?: boolean;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "profiles_id_fkey";
+            columns: ["id"];
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          }
+        ];
       };
     };
     Views: {

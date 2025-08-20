@@ -6,7 +6,7 @@ export default function SignInButton() {
   const router = useRouter();
 
   return (
-    <Button variant="secondary" onClick={() => router.push("visitor/sign-in")}>
+    <Button variant="secondary" onClick={() => router.push("/visitor/sign-in")}>
       Sign In
     </Button>
   );

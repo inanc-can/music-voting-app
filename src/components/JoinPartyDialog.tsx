@@ -67,10 +67,50 @@ export default function JoinPartyDialog({ onJoinParty }: JoinPartyDialogProps) {
     console.log("Joining party...");
     e.preventDefault();
     console.log("Selected party:", selectedParty);
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (user && selectedParty) {
+    
+    // Get current user (either authenticated or anonymous)
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    
+    if (userError) {
+      console.error("Error getting user:", userError);
+      return;
+    }
+    
+    if (!user) {
+      console.error("No user found");
+      return;
+    }
+    
+    console.log("Current user:", {
+      id: user.id,
+      email: user.email,
+      is_anonymous: user.is_anonymous,
+      metadata: user.user_metadata
+    });
+    
+    if (selectedParty) {
+      // Check if user is already in this party
+      const { data: existingParticipant, error: checkError } = await supabase
+        .from("partyparticipants")
+        .select("id")
+        .eq("party_id", selectedParty)
+        .eq("user_id", user.id)
+        .maybeSingle();
+      
+      if (checkError) {
+        console.error("Error checking existing participation:", checkError);
+        return;
+      }
+      
+      if (existingParticipant) {
+        console.log("User already in party");
+        onJoinParty(selectedParty);
+        setOpen(false);
+        setSelectedParty(null);
+        return;
+      }
+      
+      // Join the party
       const { data, error } = await supabase
         .from("partyparticipants")
         .insert({
@@ -78,7 +118,8 @@ export default function JoinPartyDialog({ onJoinParty }: JoinPartyDialogProps) {
           user_id: user.id,
         })
         .single();
-      console.log(data);
+      
+      console.log("Join result:", data);
 
       if (error) {
         console.error("Error joining party:", error);

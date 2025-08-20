@@ -36,17 +36,28 @@ export default function Login() {
   // This function handles the login process
   const login = async () => {
     try {
+      console.log("Attempting to sign in with:", data.email);
+      
       let { data: dataUser, error } = await supabase.auth.signInWithPassword({
         email: data.email,
         password: data.password,
       });
 
-      if (dataUser) {
-        router.push("/");
+      if (error) {
+        console.error("Sign-in error:", error);
+        return;
+      }
+
+      if (dataUser && dataUser.user) {
+        console.log("Sign-in successful:", dataUser.user.email);
+        console.log("User is anonymous:", dataUser.user.is_anonymous);
+        
+        // Redirect to visitor page to join a party
+        router.push("/visitor");
         router.refresh();
       }
     } catch (error) {
-      console.log(error);
+      console.error("Sign-in error:", error);
     }
   };
 

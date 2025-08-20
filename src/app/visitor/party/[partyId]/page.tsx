@@ -6,6 +6,8 @@ import SearchBar from "@/components/SearchBar";
 import PartySearchBar from "@/components/PartySearchBar";
 import ParticipantAvatars from "@/components/ParticipantAvatars";
 import SignInButton from "@/components/SignInButton";
+import SignUpDialog from "@/components/SignUpDialog";
+import LogoutButton from "@/components/LogOutButton";
 import VoteTable from "@/components/Vote/VoteTable";
 import LeavePartyButton from "@/components/LeavePartyButton";
 import { ArrowUp } from "lucide-react";
@@ -26,6 +28,13 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
+
+interface UserProfile {
+  id?: string;
+  first_name?: string;
+  last_name?: string;
+  show_profile?: boolean;
+}
 
 export default function PartyPage() {
   const { partyId } = useParams() as { partyId: string };
@@ -48,13 +57,46 @@ export default function PartyPage() {
   const [partySearchQuery, setPartySearchQuery] = useState("");
   const [isSpotifySearchLoading, setIsSpotifySearchLoading] = useState(false);
   const [isPartySearchLoading, setIsPartySearchLoading] = useState(false);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserProfile({
+          id: user.id,
+          first_name: user.user_metadata.first_name,
+          last_name: user.user_metadata.last_name,
+          show_profile: user.user_metadata.show_profile
+        });
+      } else {
+        setUserProfile(null);
+      }
+    };
+    fetchUserProfile();
+
+    // Subscribe to auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT') {
+        setUserProfile(null);
+      } else if (session?.user) {
+        setUserProfile({
+          id: session.user.id,
+          first_name: session.user.user_metadata.first_name,
+          last_name: session.user.user_metadata.last_name,
+          show_profile: session.user.user_metadata.show_profile
+        });
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const handleDrawerOpenChange = (open: boolean) => {
     setIsDrawerOpen(open);
     if (open) {
-      // This function will run when the drawer is opened
-      console.log("Drawer was opened");
-      // Fetch currently playing song when drawer opens
       fetchCurrentSong();
     }
   };
@@ -64,10 +106,6 @@ export default function PartyPage() {
       const response = await fetch('/api/spotify/currentSong');
       if (response.ok) {
         const songData = await response.json();
-        // Note: The API currently returns just the URI, you may need to modify it
-        // to return the full song data including image, title, artist
-        console.log("Current song:", songData);
-        // For now, we'll use placeholder data
         setCurrentSong({
           song_id: "placeholder_id",
           image: "https://upload.wikimedia.org/wikipedia/en/1/1b/Adele_-_21.png",
@@ -79,9 +117,8 @@ export default function PartyPage() {
       console.error("Error fetching current song:", error);
     }
   };
+
   const handleLeaveParty = () => {
-    console.log("User has left the party");
-    // Handle any additional logic after leaving the party
     router.push("/");
     router.refresh();
   };
@@ -103,14 +140,16 @@ export default function PartyPage() {
     };
 
     fetchParty();
-    // Also fetch current song on component mount
     fetchCurrentSong();
   }, [partyId]);
 
   async function getPartyParticipants(party_id: string) {
-    console.log(party_id);
     try {
-      // Get participants
+      // Get participants with their metadata
+      // Get current user first
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+
+      // Then get all participants
       const { data: participantsData, error: participantsError } = await supabase
         .from("partyparticipants")
         .select("id, user_id")
@@ -122,19 +161,42 @@ export default function PartyPage() {
       }
 
       if (participantsData && participantsData.length > 0) {
-        // Create mock user data since we might not have profiles table
-        const participantsWithProfiles = participantsData.map((participant, index) => ({
-          ...participant,
-          profiles: {
-            id: participant.user_id,
-            username: `User${index + 1}`,
-            avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${participant.user_id}`,
-            email: `user${index + 1}@example.com`
+        const participantsWithProfiles = participantsData.map(participant => {
+          // If this is the current user, use their metadata
+          if (currentUser && participant.user_id === currentUser.id) {
+            const metadata = currentUser.user_metadata || {};
+            return {
+              ...participant,
+              profiles: {
+                id: participant.user_id,
+                username: metadata.first_name 
+                  ? `${metadata.first_name} ${metadata.last_name}`
+                  : currentUser.email?.split('@')[0] || 'Anonymous',
+                avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${participant.user_id}`,
+                email: currentUser.email || null,
+                show_profile: metadata.show_profile !== false
+              }
+            };
           }
-        }));
 
-        setPartyParticipants(participantsWithProfiles);
-        return participantsData.length;
+          // For other participants, show as Anonymous unless we implement a profiles table
+          return {
+            ...participant,
+            profiles: {
+              id: participant.user_id,
+              username: 'Anonymous',
+              avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${participant.user_id}`,
+              email: null,
+              show_profile: true
+            }
+          };
+        });
+
+        const filteredParticipants = participantsWithProfiles
+          .filter(p => p.profiles.show_profile || p.profiles.id === userProfile?.id);
+
+        setPartyParticipants(filteredParticipants);
+        return filteredParticipants.length;
       }
 
       setPartyParticipants([]);
@@ -174,9 +236,25 @@ export default function PartyPage() {
         <LoadingComponent />
       ) : (
         <>
-          <h1 className="text-3xl font-bold text-center mt-8 text-white">
-            Welcome to {party?.name}
-          </h1>
+          <div className="flex justify-between items-center px-8 pt-8">
+            <h1 className="text-3xl font-bold text-center text-white">
+              {party?.name}
+            </h1>
+            {userProfile ? (
+              <div className="flex items-center gap-4">
+                <div className="text-white text-right">
+                  <p className="font-medium">{userProfile.first_name} {userProfile.last_name}</p>
+                  <p className="text-sm opacity-70">Participant</p>
+                </div>
+                <LogoutButton />
+              </div>
+            ) : (
+              <div className="flex gap-4">
+                <SignInButton />
+                <SignUpDialog />
+              </div>
+            )}
+          </div>
           <div className="my-4">
             <ParticipantAvatars participants={partyParticipants} maxVisible={3} />
           </div>
@@ -267,7 +345,6 @@ export default function PartyPage() {
                 </DrawerHeader>
 
                 <DrawerFooter>
-                  <SignInButton />
                   <LeavePartyButton onLeaveParty={handleLeaveParty} />
                 </DrawerFooter>
               </DrawerContent>
