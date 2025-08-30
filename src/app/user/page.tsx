@@ -9,6 +9,7 @@ import JoinPartyDialog from "@/components/JoinPartyDialog";
 import { useRouter } from "next/navigation";
 import DeletePartyDialog from "@/components/DeletePartyDialog";
 import LoadingComponent from "@/components/LoadingComponent";
+import SharePartyDialog from "@/components/SharePartyDialog";
 import { Switch } from "@/components/ui/switch";
 import SearchBar from "@/components/SearchBar";
 import Table from "@/components/Table";
@@ -130,9 +131,11 @@ export default function HomeComponent() {
                 {hasParty && (
                   <div className="flex flex-row space-x-4">
                     <div>
-                      <p className="font-semibold text-2xl text-gray-200">
-                        Welcome to {partyName}
-                      </p>
+                      <div className="flex items-center gap-3">
+                        <p className="font-semibold text-2xl text-gray-200">
+                          Welcome to {partyName}
+                        </p>
+                      </div>
                       <p className="text-gray-300 font-normal text-xl">
                         Participants: {partyParticipantsCount}
                       </p>
@@ -150,6 +153,8 @@ export default function HomeComponent() {
                 )}
               </div>
               <div className="flex space-x-4">
+                <SharePartyDialog partyId={partyId} partyName={partyName} />
+
                 {!hasParty && (
                   <CreatePartyDialog
                     onCreateParty={(partyDetails) => {
