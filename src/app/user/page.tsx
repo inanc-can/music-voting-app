@@ -1,39 +1,41 @@
 "use client";
-import { useEffect, useState, useCallback, Suspense } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { duration, playSong } from "@/lib/spotify";
 import { CreatePartyDialog } from "@/components/CreatePartyDialog";
 import LogoutButton from "@/components/LogOutButton";
 import { supabase } from "@/lib/supabase";
 import JoinPartyDialog from "@/components/JoinPartyDialog";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import DeletePartyDialog from "@/components/DeletePartyDialog";
 import LoadingComponent from "@/components/LoadingComponent";
 import SharePartyDialog from "@/components/SharePartyDialog";
-import { Switch } from "@/components/ui/switch";
 import SearchBar from "@/components/SearchBar";
-import Table from "@/components/Table";
+import PartySearchBar from "@/components/PartySearchBar";
+import VoteTable from "@/components/Vote/VoteTable";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { pickWinnerSong } from "@/lib/song";
-// Import dynamically
-import dynamic from "next/dynamic";
 import { MenuBar } from "@/components/menu-bar";
-
-// Dynamic import with no SSR
-const SearchResults = dynamic(() => import("@/components/SearchResults"), {
-  ssr: false,
-});
+import ParticipantAvatars from "@/components/ParticipantAvatars";
 
 export default function HomeComponent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const query = searchParams.get("query") || "";
+  const currentPage = Number(searchParams.get("page")) || 1;
   const [userId, setUserId] = useState("");
   const [hasParty, sethasParty] = useState(false);
   const [inparty, setInParty] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [partyName, setPartyName] = useState("");
   const [partyParticipantsCount, setPartyParticipantsCount] = useState(0);
+  const [partyParticipants, setPartyParticipants] = useState<any[]>([]);
   const [partyId, setPartyId] = useState("");
   const [loading, setLoading] = useState(true);
-  const [showSearchBar, setShowSearchBar] = useState(false);
+  const [activeTab, setActiveTab] = useState("current");
+  const [partySearchQuery, setPartySearchQuery] = useState("");
+  const [isSpotifySearchLoading, setIsSpotifySearchLoading] = useState(false);
+  const [isPartySearchLoading, setIsPartySearchLoading] = useState(false);
 
   const polling = useCallback(async () => {
     // Logic to pick a winner song
@@ -51,18 +53,67 @@ export default function HomeComponent() {
   }, [partyId]);
 
   async function getPartyParticipants(party_id: string) {
-    console.log(party_id);
     try {
-      const { data, error } = await supabase
+      if (!party_id) {
+        setPartyParticipants([]);
+        return 0;
+      }
+
+      const {
+        data: { user: currentUser },
+      } = await supabase.auth.getUser();
+
+      const { data: participantsData, error: participantsError } = await supabase
         .from("partyparticipants")
-        .select("id")
+        .select("id, user_id")
         .eq("party_id", party_id);
 
-      if (data) {
-        return data.length;
+      if (participantsError) {
+        console.error("Error fetching participants:", participantsError);
+        setPartyParticipants([]);
+        return 0;
       }
+
+      if (participantsData && participantsData.length > 0) {
+        const participantsWithProfiles = participantsData.map((participant) => {
+          if (currentUser && participant.user_id === currentUser.id) {
+            const metadata = currentUser.user_metadata || {};
+            return {
+              ...participant,
+              profiles: {
+                id: participant.user_id,
+                username: metadata.first_name
+                  ? `${metadata.first_name} ${metadata.last_name}`
+                  : currentUser.email?.split("@")[0] || "Anonymous",
+                avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${participant.user_id}`,
+                email: currentUser.email || null,
+                show_profile: metadata.show_profile !== false,
+              },
+            };
+          }
+
+          return {
+            ...participant,
+            profiles: {
+              id: participant.user_id,
+              username: "Anonymous",
+              avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${participant.user_id}`,
+              email: null,
+              show_profile: true,
+            },
+          };
+        });
+
+        setPartyParticipants(participantsWithProfiles);
+        return participantsWithProfiles.length;
+      }
+
+      setPartyParticipants([]);
+      return 0;
     } catch (error) {
       console.error("Error fetching data:", error);
+      setPartyParticipants([]);
+      return 0;
     }
   }
 
@@ -140,15 +191,6 @@ export default function HomeComponent() {
                         Participants: {partyParticipantsCount}
                       </p>
                     </div>
-                    <div className="flex items-center space-x-4">
-                      <Switch
-                        checked={showSearchBar}
-                        onCheckedChange={(checked) => setShowSearchBar(checked)}
-                      />
-                      <span className="text-gray-300 text-sm">
-                        Show Search Bar
-                      </span>
-                    </div>
                   </div>
                 )}
               </div>
@@ -208,19 +250,53 @@ export default function HomeComponent() {
           </div>
 
           {hasParty && (
+            <div className="my-2">
+              <ParticipantAvatars participants={partyParticipants} maxVisible={3} />
+            </div>
+          )}
+
+          {hasParty && (
             <>
-              {showSearchBar && (
-                <div className="w-4/5 mx-auto">
-                  <SearchBar placeholder="Search a Song" />
-                  <Suspense fallback={<LoadingComponent />}>
-                    <SearchResults partyId={partyId} />
-                  </Suspense>
-                </div>
-              )}
-              {!showSearchBar && <Table partyId={partyId} />}
+              <div className="w-4/5 mx-auto my-4">
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                  <TabsList className="grid w-fit grid-cols-2 h-8 mx-auto">
+                    <TabsTrigger value="current" className="text-xs px-3 py-1">Current</TabsTrigger>
+                    <TabsTrigger value="search" className="text-xs px-3 py-1">Search</TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="current" className="mt-4">
+                    <PartySearchBar
+                      placeholder="Search songs in this party"
+                      onSearchChange={setPartySearchQuery}
+                      initialValue={partySearchQuery}
+                      onLoadingChange={setIsPartySearchLoading}
+                    />
+                    <VoteTable
+                      query={partySearchQuery}
+                      currentPage={currentPage}
+                      partyId={partyId}
+                      searchMode="party"
+                      onLoadingChange={setIsPartySearchLoading}
+                    />
+                  </TabsContent>
+
+                  <TabsContent value="search" className="mt-4">
+                    <SearchBar
+                      placeholder="Search all songs on Spotify"
+                      onLoadingChange={setIsSpotifySearchLoading}
+                    />
+                    <VoteTable
+                      query={query}
+                      currentPage={currentPage}
+                      partyId={partyId}
+                      searchMode="spotify"
+                      onLoadingChange={setIsSpotifySearchLoading}
+                    />
+                  </TabsContent>
+                </Tabs>
+              </div>
             </>
           )}
-          <MenuBar className="" />
         </div>
       )}
     </div>

@@ -6,7 +6,7 @@ export async function getSongsVotes(song_id: string, party_id: string) {
       .from("votesSongs")
       .select("song_id")
       .eq("song_id", song_id)
-      .eq("partyId", party_id);
+  .eq("partyId", party_id);
 
     if (data) {
       return data.length;
@@ -23,7 +23,7 @@ export async function pickWinnerSong(
     const { data, error } = await supabase
       .from("votesSongs")
       .select("song_id")
-      .eq("party_id", party_id);
+  .eq("partyId", party_id);
 
     if (data) {
       const counts = data.reduce(

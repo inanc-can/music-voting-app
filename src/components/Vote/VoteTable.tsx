@@ -40,14 +40,12 @@ const VoteTable: React.FC<VoteTableProps> = ({
   };
 
   useEffect(() => {
-    const fetchResults = async () => {
+    const fetchResults = async (opts?: { silent?: boolean }) => {
       // Set loading only when there's a meaningful search happening
-      const shouldShowLoading = (searchMode === "spotify" && query !== "") || 
-                               (searchMode === "party" && query !== "");
-      
-      if (shouldShowLoading) {
-        updateLoadingState(true);
-      }
+      const shouldShowLoading = ((searchMode === "spotify" && query !== "") ||
+        (searchMode === "party" && query !== "")) && !opts?.silent;
+
+      if (shouldShowLoading) updateLoadingState(true);
 
       // If searchMode is "party", always show party songs
       if (searchMode === "party") {
@@ -74,14 +72,14 @@ const VoteTable: React.FC<VoteTableProps> = ({
         const sortedResults = convertedResults.sort(
           (a, b) => (b.votes || 0) - (a.votes || 0)
         );
-        setResults(sortedResults.slice(0, 16));
-        updateLoadingState(false);
+  setResults(sortedResults.slice(0, 16));
+  if (!opts?.silent) updateLoadingState(false);
         return;
       }
 
       // Original spotify search logic
       if (query === "") {
-        const topVotedSongs = await getSongClicks(partyId);
+  const topVotedSongs = await getSongClicks(partyId);
         const convertedResults = await Promise.all(
           topVotedSongs.map(async (track: any) => ({
             song_id: track.song_id,
@@ -94,8 +92,8 @@ const VoteTable: React.FC<VoteTableProps> = ({
         const sortedResults = convertedResults.sort(
           (a, b) => (b.votes || 0) - (a.votes || 0)
         );
-        setResults(sortedResults.slice(0, 16));
-        updateLoadingState(false);
+  setResults(sortedResults.slice(0, 16));
+  if (!opts?.silent) updateLoadingState(false);
         return;
       }
       try {
@@ -123,14 +121,14 @@ const VoteTable: React.FC<VoteTableProps> = ({
           );
 
           setResults(sortedResults.slice(0, 16));
-          updateLoadingState(false);
+          if (!opts?.silent) updateLoadingState(false);
         } else {
           console.error("Failed to fetch search results");
-          updateLoadingState(false);
+          if (!opts?.silent) updateLoadingState(false);
         }
       } catch (error) {
         console.error("An error occurred while searching", error);
-        updateLoadingState(false);
+        if (!opts?.silent) updateLoadingState(false);
       }
     };
 
@@ -141,8 +139,29 @@ const VoteTable: React.FC<VoteTableProps> = ({
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "votesSongs" },
-        () => {
-          fetchResults();
+        async (payload: any) => {
+          const updatedSongId = payload?.new?.song_id || payload?.old?.song_id;
+          if (!updatedSongId) {
+            // Fallback: silent refresh
+            fetchResults({ silent: true });
+            return;
+          }
+
+          if (searchMode === "spotify") {
+            // Update only the affected song’s votes to avoid full rerender
+            const newVotes = await getSongsVotes(updatedSongId, partyId);
+            setResults((prev) => {
+              let next = prev.map((s) =>
+                s.song_id === updatedSongId ? { ...s, votes: newVotes || 0 } : s
+              );
+              // Keep list sorted without remounting all components
+              next = [...next].sort((a, b) => (b.votes || 0) - (a.votes || 0));
+              return next.slice(0, 16);
+            });
+          } else {
+            // For party mode the set may change, do a silent refresh
+            fetchResults({ silent: true });
+          }
         }
       )
       .subscribe((status) => {
@@ -166,10 +185,10 @@ const VoteTable: React.FC<VoteTableProps> = ({
           <VoteBoxSkeleton key={`skeleton-${index}`} />
         ))
       ) : (
-        results.map((track: any, key: number) => (
-          <Suspense fallback={<VoteBoxSkeleton />} key={key}>
+        results.map((track: any) => (
+          <Suspense fallback={<VoteBoxSkeleton />} key={track.song_id}>
             <VoteBox
-              key={key}
+              key={track.song_id}
               image={track.image}
               artist={track.artist}
               songName={track.title}

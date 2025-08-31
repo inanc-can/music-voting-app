@@ -15,7 +15,8 @@ export const useSongClick = () => {
   const getSongClicks = async (partyId: string): Promise<VoteBox[]> => {
     const { data: votes, error } = await supabase
       .from("votesSongs")
-      .select("song_id");
+      .select("song_id")
+      .eq("partyId", partyId);
 
     if (!votes) {
       console.error("No votes found");
