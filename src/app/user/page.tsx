@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { duration, playSong } from "@/lib/spotify";
 import { CreatePartyDialog } from "@/components/CreatePartyDialog";
@@ -18,7 +18,7 @@ import { pickWinnerSong } from "@/lib/song";
 import { MenuBar } from "@/components/menu-bar";
 import ParticipantAvatars from "@/components/ParticipantAvatars";
 
-export default function HomeComponent() {
+function UserPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const query = searchParams.get("query") || "";
@@ -300,5 +300,13 @@ export default function HomeComponent() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function HomeComponent() {
+  return (
+    <Suspense fallback={<LoadingComponent />}>
+      <UserPageContent />
+    </Suspense>
   );
 }
